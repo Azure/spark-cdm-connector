@@ -1,0 +1,5 @@
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.build text eol=lf
+*.scala
+Makefile text eol=lf
