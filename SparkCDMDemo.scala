@@ -1,6 +1,5 @@
 // Databricks notebook source
-import com.microsoft.cdm.utils.{AADProvider, ADLGen2Provider}
-import org.apache.spark.sql.types.{IntegerType, MetadataBuilder, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
 
 val appid = ""
 val appkey = ""
@@ -8,196 +7,139 @@ val tenantid = ""
 
 
 
-
-val container = "/output"
-val storage = "tcbstoragecdm.dfs.core.windows.net"
+val outputContainer = "<containerName>"
+val storageAccountName = "<storageAccount>.dfs.core.windows.net"
 
 
 // COMMAND ----------
 
+//implicit case
+import org.apache.spark.sql.types.{BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
 
-try {
-  val data = Seq(
-    Row("tim", 1),
-    Row("brad", 10)
-  )
+//Parquet Demo with implicit Schema building
+val date= java.sql.Date.valueOf("2015-03-31");
+val timestamp = new java.sql.Timestamp(System.currentTimeMillis());
+val data = Seq(
+  Row("a", 1, true, 12.34,6L, date, Decimal(2.3), timestamp) ,
+  Row("b", 2, false, 13.34,7L, date, Decimal(3.3), timestamp),
+   Row("c", 3, true, 12.34,6L, date, Decimal(2.3), timestamp) ,
+  Row("d", 4, false, 13.34,7L, date, Decimal(3.3), timestamp),
+   Row("e", 5, true, 12.34,6L, date, Decimal(2.3), timestamp) ,
+  Row("f", 6, false, 13.34,7L, date, Decimal(3.3), timestamp),
+   Row("g", 7, true, 12.34,6L, date, Decimal(2.3), timestamp) ,
+  Row("h", 8, false, 13.34,7L, date, Decimal(3.3), timestamp)
+)
 
-  val schema = new StructType()
-    .add(StructField("name", StringType, true))
-    .add(StructField("id", IntegerType, true))
+ val schema = new StructType()
+        .add(StructField("name", StringType, true))
+        .add(StructField("id", IntegerType, true))
+        .add(StructField("flag", BooleanType, true))
+        .add(StructField("salary", DoubleType, true))
+        .add(StructField("phone", LongType, true))
+        .add(StructField("dob", DateType, true))
+        .add(StructField("weight",  DecimalType(28,1), true))
+        .add(StructField("time", TimestampType, true))
 
-  val df = spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
+val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
 
-  //Create a new manifest and add the entity to it
-  df.write.format("com.microsoft.cdm")
-    .option("storage", storage)
-    .option("container", container)
-    .option("manifest", "default.manifest.cdm.json")
-    .option("entity", "TestEntity")
-    .option("format", "parquet")
-    .option("databricks", true)
-    .option("appId", appid)
-    .option("appKey", appkey)
-    .option("tenantId", tenantid)
-    .save()
+//Create a new manifest and add the entity to it
+df.write.format("com.microsoft.cdm")
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/root/default.manifest.cdm.json")
+  .option("entity", "TestEntity")
+  .option("format", "parquet")
+  .option("appId", appid)
+  .option("appKey", appkey)
+  .option("tenantId", tenantid)
+  .save()
 
-  val readDf = spark.read.format("com.microsoft.cdm")
-    .option("storage", "tcbstoragecdm.dfs.core.windows.net")
-    .option("container", container)
-    .option("manifest", "default.manifest.cdm.json")
-    .option("entity", "TestEntity")
-    .option("databricks", true)
-    .option("appId", appid)
-    .option("appKey", appkey)
-    .option("tenantId", tenantid)
-    .load()
-  readDf.select("*").show(2)
-  val res = df.select("name").collect()(0)
-  assert(df.select("name").collect()(0).getString(0) == "tim")
-  assert(df.select("id").collect()(1).getInt(0) == 10)
-} finally {
-  
+// Append the same dataframe to the entity
+df.write.format("com.microsoft.cdm")
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/root/default.manifest.cdm.json")
+  .option("entity", "TestEntity")
+  .option("format", "parquet")
+  .option("appId", appid)
+  .option("appKey", appkey)
+  .option("tenantId", tenantid)
+  .mode(SaveMode.Append)
+  .save()
 
-}
+
+val readDf = spark.read.format("com.microsoft.cdm")
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/root/default.manifest.cdm.json")
+  .option("entity", "TestEntity")
+  .option("appId", appid)
+  .option("appKey", appkey)
+  .option("tenantId", tenantid)
+  .load()
+
+readDf.select("*").show()
       
 
 // COMMAND ----------
 
-// Demo creating entities and data from predefined locations
-
+//Predefined writes
 val data = Seq(
-  Row(1, 2, 3, 4),
-  Row(5, 6, 7, 8)
-)
-
+        Row("1", "2", "3", 4), Row("4", "5", "6", 8),Row("7", "8", "9", 4),Row("10", "11", "12", 8),Row("13", "14", "15", 4))
 val schema = new StructType()
-  .add(StructField("teamMembershipId", IntegerType, true))
-   .add(StructField("systemUserId", IntegerType, true))
-   .add(StructField("teamId", IntegerType, true))
-   .add(StructField("versinNumber", IntegerType, true))
+        .add(StructField("teamMembershipId", StringType, true))
+        .add(StructField("systemUserId", StringType, true))
+        .add(StructField("teamId", StringType, true))
+        .add(StructField("versinNumber", IntegerType, true))
 
 val df = spark.createDataFrame(spark.sparkContext.parallelize(data, 1), schema)
-
-// entityPath meanse we are going to build this entity from a predefined entity, not from scratch
-// If corpusPath is provided, that will serve as our reference for CDM:/:
-// * the first path is the container, the second is the directory for the CDM contents
-// If corpusPath is not provided, we use the github CDM
 df.write.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "TeamMembership")
-  .option("entityPath", "/core/applicationCommon/TeamMembership.cdm.json/TeamMembership")
-  .option("databricks", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .save()
+        .option("storage", storageAccountName)
+        .option("container", outputContainer)
+        .option("manifest", "root2/root.manifest.cdm.json")
+        .option("entity", "TeamMembership")
+        .option("entityDefinition", "core/applicationCommon/TeamMembership.cdm.json/TeamMembership")
+        .option("useSubManifest", true)
+        .option("appId", appid)
+        .option("appKey", appkey)
+        .option("tenantId", tenantid)
+        .mode(SaveMode.Overwrite)
+        .save()
 
 df.write.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "KnowledgeArticleCategory")
-  .option("entityPath", "/core/applicationCommon/KnowledgeArticleCategory.cdm.json/KnowledgeArticleCategory")
-  .option("corpusPath", "/outputsubmanifest/example-public-standards")
-  .option("databricks", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .save()
+        .option("storage", storageAccountName)
+        .option("container", outputContainer)
+        .option("manifest", "/root2/root.manifest.cdm.json")
+        .option("entity", "KnowledgeArticleCategory")
+        .option("entityDefinitionContainer", "outputsubmanifest")
+        .option("entityDefinitionModelRoot", "example-public-standards")
+        .option("entityDefinition", "/core/applicationCommon/KnowledgeArticleCategory.cdm.json/KnowledgeArticleCategory")
+        .option("useSubManifest", true)
+        .option("format", "parquet")
+        .option("appId", appid)
+        .option("appKey", appkey)
+        .option("tenantId", tenantid)
+        .mode(SaveMode.Overwrite)
+        .save()
 
 val readDf = spark.read.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "TeamMembership")
-  .option("databricks", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .load()
+        .option("storage", storageAccountName)
+        .option("container", outputContainer)
+        .option("manifest", "/root2/root.manifest.cdm.json")
+        .option("entity", "TeamMembership")
+        .option("appId", appid)
+        .option("appKey", appkey)
+        .option("tenantId", tenantid)
+        .load()
 
 val readDf2 = spark.read.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "KnowledgeArticleCategory")
-  .option("databricks", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .load()
-
-readDf2.select("*").show()
-
-
-// COMMAND ----------
-
-// Demo creating entities and data in submanifests from predefined locations
-
-val data = Seq(
-  Row("1", "2", "3", "4"),
-  Row("5", "6", "7", "8")
-)
-val schema = new StructType()
-  .add(StructField("teamMembershipId", StringType, true))
-  .add(StructField("systemUserId", StringType, true))
-  .add(StructField("teamId", StringType, true))
-  .add(StructField("versinNumber", StringType, true))
-
-val df = spark.createDataFrame(spark.sparkContext.parallelize(data, 1), schema)
-      // entityPath means we are going to build this entity from a predefined entity, not from scratch
-      // If corpusPath is provided, that will serve as our reference for CDM:/:
-      // * the first path is the container, the second is the directory for the CDM contents
-      // If corpusPath is not provided, we use the github CDM
-      // No corpus path location, so the github adapter is used for the predefined entity
-df.write.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "TeamMembership")
-  .option("entityPath", "/core/applicationCommon/TeamMembership.cdm.json/TeamMembership")
-  .option("useSubManifest", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .save()
-
-df.write.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "KnowledgeArticleCategory")
-  .option("entityPath", "/core/applicationCommon/KnowledgeArticleCategory.cdm.json/KnowledgeArticleCategory")
-  .option("corpusPath", "/outputsubmanifest/example-public-standards")
-  .option("databricks", true)
-  .option("useSubManifest", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .save()
-
-val readDf = spark.read.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "TeamMembership")
-  .option("databricks", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .load()
-
-val readDf2 = spark.read.format("com.microsoft.cdm")
-  .option("storage", storage)
-  .option("container", container)
-  .option("manifest", "root.manifest.cdm.json")
-  .option("entity", "KnowledgeArticleCategory")
-  .option("databricks", true)
-  .option("appId", appid)
-  .option("appKey", appkey)
-  .option("tenantId", tenantid)
-  .load()
-readDf2.select("*").show()
-
+        .option("storage", storageAccountName)
+        .option("container", outputContainer)
+        .option("manifest", "/root2/root.manifest.cdm.json")
+        .option("entity", "KnowledgeArticleCategory")
+        .option("appId", appid)
+        .option("appKey", appkey)
+        .option("tenantId", tenantid)
+        .load()
+readDf.select("*").show
+      
