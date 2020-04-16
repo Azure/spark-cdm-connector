@@ -90,7 +90,7 @@ val schema = new StructType()
         .add(StructField("teamMembershipId", StringType, true))
         .add(StructField("systemUserId", StringType, true))
         .add(StructField("teamId", StringType, true))
-        .add(StructField("versinNumber", IntegerType, true))
+        .add(StructField("versionNumber", IntegerType, true))
 
 val df = spark.createDataFrame(spark.sparkContext.parallelize(data, 1), schema)
 df.write.format("com.microsoft.cdm")
