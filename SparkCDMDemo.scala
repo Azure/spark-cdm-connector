@@ -1,14 +1,13 @@
 // Databricks notebook source
-//import com.microsoft.cdm.utils.{AADProvider, ADLGen2Provider}
 import org.apache.spark.sql.types.{BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
-
 
 val appid = ""
 val appkey = ""
 val tenantid = ""
 
-val outputContainer = "<container"
-val storageAccountName = "<storage>.dfs.core.windows.net"
+
+val outputContainer = "<container>"
+val storageAccountName = "<storageaccount>.dfs.core.windows.net"
 
 
 // COMMAND ----------
@@ -44,7 +43,6 @@ df.write.format("com.microsoft.cdm")
   .option("container", outputContainer)
   .option("manifest", "/root/default.manifest.cdm.json")
   .option("entity", "TestEntity")
-  .option("useCDMGithub", true)
   .option("format", "parquet")
   .option("compression", "gzip")
   .option("appId", appid)
@@ -58,7 +56,6 @@ df.write.format("com.microsoft.cdm")
   .option("container", outputContainer)
   .option("manifest", "/root/default.manifest.cdm.json")
   .option("entity", "TestEntity")
-  .option("useCDMGithub", true)
   .option("appId", appid)
   .option("appKey", appkey)
   .option("tenantId", tenantid)
@@ -70,7 +67,6 @@ val readDf = spark.read.format("com.microsoft.cdm")
   .option("container", outputContainer)
   .option("manifest", "/root/default.manifest.cdm.json")
   .option("entity", "TestEntity")
-  .option("useCDMGithub", true)
   .option("appId", appid)
   .option("appKey", appkey)
   .option("tenantId", tenantid)
@@ -78,17 +74,20 @@ val readDf = spark.read.format("com.microsoft.cdm")
 
 readDf.select("*").show()
 readDf.count()
+      
 
 // COMMAND ----------
 
-//Predefined writes
+//explicit writes
+
+//Example 1. Write using Github as ModelRoot
 val data = Seq(
         Row("1", "2", "3", 4L), Row("4", "5", "6", 8L),Row("7", "8", "9", 4L),Row("10", "11", "12", 8L),Row("13", "14", "15", 4L))
 val schema = new StructType()
         .add(StructField("teamMembershipId", StringType, true))
         .add(StructField("systemUserId", StringType, true))
         .add(StructField("teamId", StringType, true))
-        .add(StructField("versinNumber", LongType, true))
+        .add(StructField("versionNumber", LongType, true))
 
 val df = spark.createDataFrame(spark.sparkContext.parallelize(data, 1), schema)
 df.write.format("com.microsoft.cdm")
@@ -97,24 +96,8 @@ df.write.format("com.microsoft.cdm")
         .option("manifest", "root2/root.manifest.cdm.json")
         .option("entity", "TeamMembership")
         .option("entityDefinition", "core/applicationCommon/TeamMembership.cdm.json/TeamMembership")
-        .option("useCDMGithub", true)
+        .option("useCdmGithubModelRoot", true)
         .option("useSubManifest", true)
-        .option("appId", appid)
-        .option("appKey", appkey)
-        .option("tenantId", tenantid)
-        .mode(SaveMode.Overwrite)
-        .save()
-
-df.write.format("com.microsoft.cdm")
-        .option("storage", storageAccountName)
-        .option("container", outputContainer)
-        .option("manifest", "/root2/root.manifest.cdm.json")
-        .option("entity", "KnowledgeArticleCategory")
-        .option("entityDefinitionContainer", "outputsubmanifest")
-        .option("entityDefinitionModelRoot", "example-public-standards")
-        .option("entityDefinition", "/core/applicationCommon/KnowledgeArticleCategory.cdm.json/KnowledgeArticleCategory")
-        .option("useSubManifest", true)
-        .option("format", "parquet")
         .option("appId", appid)
         .option("appKey", appkey)
         .option("tenantId", tenantid)
@@ -131,16 +114,42 @@ val readDf = spark.read.format("com.microsoft.cdm")
         .option("appKey", appkey)
         .option("tenantId", tenantid)
         .load()
+readDf.select("*").show()
+
+// Example 2. Write using Githubas ModelRoot
+val timestamp = new java.sql.Timestamp(System.currentTimeMillis());
+val date = java.sql.Date.valueOf("2010-01-31")
+val data2 = Seq(
+  Row(1,  timestamp, "Jake", "Bisson", date)
+)
+
+val schema2 = new StructType()
+  .add(StructField("identifier", IntegerType))
+  .add(StructField("createdTime", TimestampType))
+  .add(StructField("firstName", StringType))
+  .add(StructField("lastName", StringType))
+  .add(StructField("birthDate", DateType))
+
+val df2 = spark.createDataFrame(spark.sparkContext.parallelize(data2, 1), schema2)
+df2.write.format("com.microsoft.cdm")
+    .option("storage", storageAccountName)
+    .option("container", outputContainer)
+    .option("manifest", "/data2/root.manifest.cdm.json")
+    .option("entity", "Person")
+    .option("entityDefinition", "/Contacts/Person.cdm.json/Person")
+    .option("entityDefinitionModelRoot", "/Models")
+    .option("entityDefinitionContainer", "/billsamplemodel")
+    .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+    .save()
 
 val readDf2 = spark.read.format("com.microsoft.cdm")
-        .option("storage", storageAccountName)
-        .option("container", outputContainer)
-        .option("manifest", "/root2/root.manifest.cdm.json")
-        .option("entity", "KnowledgeArticleCategory")
-        .option("useCDMGithub", true)
-        .option("appId", appid)
-        .option("appKey", appkey)
-        .option("tenantId", tenantid)
-        .load()
-readDf.select("*").show
-      
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/data2/root.manifest.cdm.json")
+  .option("entity", "Person")
+  .option("entityDefinitionModelRoot", "/Models")
+   .option("entityDefinitionContainer", "/billsamplemodel")
+  .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+  .load()
+readDf2.printSchema()
+readDf2.select("*").show()
