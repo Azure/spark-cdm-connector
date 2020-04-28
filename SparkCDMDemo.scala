@@ -6,8 +6,8 @@ val appkey = ""
 val tenantid = ""
 
 
-val outputContainer = "<container>"
-val storageAccountName = "<storageaccount>.dfs.core.windows.net"
+val outputContainer = "<container"
+val storageAccountName = "<storage>.dfs.core.windows.net"
 
 
 // COMMAND ----------
@@ -74,7 +74,7 @@ val readDf = spark.read.format("com.microsoft.cdm")
 
 readDf.select("*").show()
 readDf.count()
-      
+
 
 // COMMAND ----------
 
@@ -88,6 +88,7 @@ val schema = new StructType()
         .add(StructField("systemUserId", StringType, true))
         .add(StructField("teamId", StringType, true))
         .add(StructField("versionNumber", LongType, true))
+
 
 val df = spark.createDataFrame(spark.sparkContext.parallelize(data, 1), schema)
 df.write.format("com.microsoft.cdm")
