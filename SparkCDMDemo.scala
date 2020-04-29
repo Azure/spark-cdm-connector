@@ -1,13 +1,12 @@
 // Databricks notebook source
 import org.apache.spark.sql.types.{BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
 
-val appid = ""
-val appkey = ""
-val tenantid = ""
+val appid = "<appId>"
+val appkey = "appKey"
+val tenantid = "tenantId"
 
-
-val outputContainer = "<container"
-val storageAccountName = "<storage>.dfs.core.windows.net"
+val container = "<demoContainerName>"
+val storageAccountName = "<storageAccount>.dfs.core.windows.net"
 
 
 // COMMAND ----------
@@ -40,21 +39,22 @@ val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
 //Create a new manifest and add the entity to it with gzip'd parquet partitions
 df.write.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
-  .option("container", outputContainer)
-  .option("manifest", "/root/default.manifest.cdm.json")
+  .option("container", container)
+  .option("manifest", "/implicitTest/default.manifest.cdm.json")
   .option("entity", "TestEntity")
   .option("format", "parquet")
   .option("compression", "gzip")
   .option("appId", appid)
   .option("appKey", appkey)
   .option("tenantId", tenantid)
+  .mode(SaveMode.Append)
   .save()
 
-// Append the same dataframe to the entity in CSV format
+// Append the same dataframe to the entity in the default CSV format
 df.write.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
-  .option("container", outputContainer)
-  .option("manifest", "/root/default.manifest.cdm.json")
+  .option("container", container)
+  .option("manifest", "/implicitTest/default.manifest.cdm.json")
   .option("entity", "TestEntity")
   .option("appId", appid)
   .option("appKey", appkey)
@@ -64,8 +64,8 @@ df.write.format("com.microsoft.cdm")
 
 val readDf = spark.read.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
-  .option("container", outputContainer)
-  .option("manifest", "/root/default.manifest.cdm.json")
+  .option("container", container)
+  .option("manifest", "/implicitTest/default.manifest.cdm.json")
   .option("entity", "TestEntity")
   .option("appId", appid)
   .option("appKey", appkey)
@@ -78,9 +78,8 @@ readDf.count()
 
 // COMMAND ----------
 
-//explicit writes
+// Explicit write using entity definition from CDM Github
 
-//Example 1. Write using Github as ModelRoot
 val data = Seq(
         Row("1", "2", "3", 4L), Row("4", "5", "6", 8L),Row("7", "8", "9", 4L),Row("10", "11", "12", 8L),Row("13", "14", "15", 4L))
 val schema = new StructType()
@@ -93,11 +92,11 @@ val schema = new StructType()
 val df = spark.createDataFrame(spark.sparkContext.parallelize(data, 1), schema)
 df.write.format("com.microsoft.cdm")
         .option("storage", storageAccountName)
-        .option("container", outputContainer)
-        .option("manifest", "root2/root.manifest.cdm.json")
+        .option("container", container)
+        .option("manifest", "explicitTest/root.manifest.cdm.json")
         .option("entity", "TeamMembership")
         .option("entityDefinition", "core/applicationCommon/TeamMembership.cdm.json/TeamMembership")
-        .option("useCdmGithubModelRoot", true)
+        .option("useCdmGithubModelRoot", true)  // sets the model root to the CDM GitHub schema documents folder
         .option("useSubManifest", true)
         .option("appId", appid)
         .option("appKey", appkey)
@@ -107,21 +106,31 @@ df.write.format("com.microsoft.cdm")
 
 val readDf = spark.read.format("com.microsoft.cdm")
         .option("storage", storageAccountName)
-        .option("container", outputContainer)
-        .option("manifest", "/root2/root.manifest.cdm.json")
+        .option("container", container)
+        .option("manifest", "/explicitTest/root.manifest.cdm.json")
         .option("entity", "TeamMembership")
-        .option("useCDMGithub", true)
+        .option("useCDMGithub", true) // sets the modelroot alias to the CDM GitHub schema documents folder
         .option("appId", appid)
         .option("appKey", appkey)
         .option("tenantId", tenantid)
         .load()
 readDf.select("*").show()
 
-// Example 2. Write using Githubas ModelRoot
-val timestamp = new java.sql.Timestamp(System.currentTimeMillis());
-val date = java.sql.Date.valueOf("2010-01-31")
+
+// COMMAND ----------
+
+// Explicit write using entity definition in ADLS
+
+// UPLOAD CDM FILES FIRST
+// To run this example, first create a /Models/Contacts folder to your demo container in ADLS gen2,
+// then upload the provided Contacts.manifest.cdm.json, Person.cdm.json, Entity.cdm.json 
+
+val birthdate= java.sql.Date.valueOf("1991-03-31");
+val now = new java.sql.Timestamp(System.currentTimeMillis());
 val data2 = Seq(
-  Row(1,  timestamp, "Jake", "Bisson", date)
+  Row(1,now,"Donna","Carreras",birthdate),
+  Row(2,now,"Keith","Harris",birthdate),
+  Row(2,now,"Carla","McGee",birthdate)
 )
 
 val schema2 = new StructType()
@@ -134,23 +143,23 @@ val schema2 = new StructType()
 val df2 = spark.createDataFrame(spark.sparkContext.parallelize(data2, 1), schema2)
 df2.write.format("com.microsoft.cdm")
     .option("storage", storageAccountName)
-    .option("container", outputContainer)
-    .option("manifest", "/data2/root.manifest.cdm.json")
+    .option("container", container)
+    .option("manifest", "/Data/Contacts/root.manifest.cdm.json")
     .option("entity", "Person")
-    .option("entityDefinition", "/Contacts/Person.cdm.json/Person")
-    .option("entityDefinitionModelRoot", "/Models")
-    .option("entityDefinitionContainer", "/billsamplemodel")
+    .option("entityDefinitionContainer", container)
+    .option("entityDefinitionModelRoot", "Models") 
+    .option("entityDefinition", "/Contacts/Person.cdm.json/Person")   
     .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+    .mode(SaveMode.Append)
     .save()
 
 val readDf2 = spark.read.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
-  .option("container", outputContainer)
-  .option("manifest", "/data2/root.manifest.cdm.json")
+  .option("container", container)
+  .option("manifest", "/Data/Contacts/root.manifest.cdm.json")
   .option("entity", "Person")
-  .option("entityDefinitionModelRoot", "/Models")
-   .option("entityDefinitionContainer", "/billsamplemodel")
+  .option("entityDefinitionContainer", container)
+  .option("entityDefinitionModelRoot", "Models")
   .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
   .load()
-readDf2.printSchema()
 readDf2.select("*").show()
