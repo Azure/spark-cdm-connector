@@ -1,0 +1,41 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/CDM/master/schemaDocuments/schema.cdm.json",
+    "jsonSchemaSemanticVersion": "1.0.0",
+    "imports": [
+        {
+            "corpusPath": "cdm:/foundations.cdm.json"
+        },
+        {
+            "corpusPath": "Entity.cdm.json"
+        }
+    ],
+    "definitions": [
+        {
+            "entityName": "Person",
+            "extendsEntity": "Entity",
+            "description": "An individual",
+            "hasAttributes": [
+                {
+                    "purpose": "hasA",
+                    "dataType": "string",
+                    "name": "firstName",
+                    "description": "Person's first name",
+                    "maximumLength": 100
+                },
+                {
+                    "purpose": "hasA",
+                    "dataType": "string",
+                    "name": "lastName",
+                    "description": "Person's last name",
+                    "maximumLength": 100
+                },
+                {
+                    "purpose": "hasA",
+                    "dataType": "date",
+                    "name": "birthDate",
+                    "description": "Person's date of birth"
+                }
+            ]
+        }
+    ]
+}

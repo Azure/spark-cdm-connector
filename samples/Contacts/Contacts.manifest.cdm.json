@@ -1,0 +1,23 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/CDM/master/schemaDocuments/schema.manifest.cdm.json",
+    "jsonSchemaSemanticVersion": "1.0.0",
+    "imports": [
+        {
+            "corpusPath": "cdm:/foundations.cdm.json"
+        }
+    ],
+    "manifestName": "Contacts",
+    "explanation": "A logical model of contacts",
+    "entities": [
+        {
+            "type": "LocalEntity",
+            "entityName": "Person",
+            "entityPath": "Person.cdm.json/Person"
+        },
+        {
+            "type": "LocalEntity",
+            "entityName": "Entity",
+            "entityPath": "Entity.cdm.json/Entity"
+        }
+    ]
+}

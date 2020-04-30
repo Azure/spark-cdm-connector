@@ -1,0 +1,29 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/CDM/master/schemaDocuments/schema.cdm.json",
+    "jsonSchemaSemanticVersion": "1.0.0",
+    "imports": [
+        {
+            "corpusPath": "cdm:/foundations.cdm.json"
+        }
+    ],
+    "definitions": [
+        {
+            "entityName": "Entity",
+            "description": "A base entity type defining common attributes used by other entities",
+            "hasAttributes": [
+                {
+                    "purpose": "hasA",
+                    "dataType": "integer",
+                    "name": "identifier",
+                    "description": "Identifier of the entity"
+                },
+                {
+                    "purpose": "hasA",
+                    "dataType": "dateTime",
+                    "name": "createdTime",
+                    "description": "The UTC time this entity was created"
+                }
+            ]
+        }
+    ]
+}
