@@ -4,6 +4,8 @@ A limited preview release of a connector that allows Spark dataframes to read an
 
 **The Spark CDM Connector is currently in an early limited preview and is not recommended or supported for use in production applications.**
 
+To get started, please see: [Using Spark CDM Connector](documentation/overview.md)
+
 To report problems, ask questions or provide feedback please send mail to asksparkcdm@microsoft.com
 
 For more information about CDM see: https://docs.microsoft.com/en-us/common-data-model/ 
