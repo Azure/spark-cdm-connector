@@ -38,7 +38,7 @@ The following capabilities or limitations apply:
 - Supports CDM folders in ADLS gen2 with HNS enabled only.
 - Supports reading from CDM folders described by either manifest or model.json files.
 - Supports writing to CDM folders described by a manifest file only. Write support for model.json file is not planned.
-- Supports data in CSV and Parquet format. Support for nested Parquet files is planned.
+- Supports data in CSV and Apache Parquet format. Support for nested parquet files is planned.
 - Supports partition patterns on read and sub-manifests on read and write.
 
 See also, Known issues, below.
@@ -60,7 +60,7 @@ The Spark CDM connector is used to modify normal Spark dataframe read and write 
 
 When reading data, the library uses metadata in the CDM folder to create the dataframe based on the structure of the source entity. Attribute names are used as column names and attribute datatypes are mapped to the column datatype. When the dataframe is loaded it is populated from the partitions identified in the manifest.
 
-Partitions for any given entity can be in different formats, for example, a mix of CSV and Parquet files. Regardless of format, all the entity data files identified in the manifest are combined into one dataset and loaded to the dataframe.
+Partitions for any given entity can be in different formats, for example, a mix of CSV and parquet files. Regardless of format, all the entity data files identified in the manifest are combined into one dataset and loaded to the dataframe.
 
 ### Writing Data
 
@@ -164,8 +164,8 @@ The folder organization and file format used on write can be changed with the fo
 |**Option**  |**Description**  |**Pattern / example usage**  |
 |---------|---------|:---------:|
 |useSubManifest|If true, causes the target entity to be included in the root manifest via a sub-manifest. The sub-manifest and the entity definition are written into an entity folder beneath the root. Default is false.|"true" or "false" |
-|format|Defines the file format. Current supported file formats are CSV and Parquet. Default is "csv"|"csv" or "parquet" <br/> |
-|compression|Defines the compression format used with Parquet. Default is "snappy"|"uncompressed" \| "snappy" \| "gzip" \| "lzo". <br/> See note below on using lzo with Azure Databricks
+|format|Defines the file format. Current supported file formats are CSV and parquet. Default is "csv"|"csv" or "parquet" <br/> |
+|compression|Defines the compression format used with parquet. Default is "snappy"|"uncompressed" \| "snappy" \| "gzip" \| "lzo". <br/> See note below on using lzo with Azure Databricks
 
 Note that the lzo codec is not available by default in Azure Databricks but must be installed. See
 [https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/read-lzo](https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/read-lzo)
@@ -182,24 +182,21 @@ overwrite, append to, or error if data already exists. The default save mode is 
 |**Mode**  |**Description**|
 |---------|---------|
 |SaveMode.Overwrite |Will overwrite existing partitions with data being written.<br/>Note: overwrite does not support changing the schema; if the schema of the data being written is incompatible with the existing entity definition an error will be thrown. |
-|SaveMode.Append |Will append data being written as new partitions alongside the existing partitions.Note: append does not support changing the schema; if the schema of the data being written is incompatible with the existing entity definition an error will be thrown.|
+|SaveMode.Append |Will append data being written as new partitions alongside the existing partitions.<br/>Note: append does not support changing the schema; if the schema of the data being written is incompatible with the existing entity definition an error will be thrown.|
 |SaveMode.ErrorIfExists|Will return an error if partitions already exist.|
 
 See *Folder organization* below for details of how data files are organized on write.
 
 ### Examples
 
-The following examples all use the appId, appKey and tenantId values set earlier in the code for an Azure
-app registration that has separately been given Storage Blob Data Contributor permissions on the
-storage for write and Storage Blob Data Reader permissions for read.
+The following examples all use appId, appKey and tenantId variables initialized earlier in the code based on an Azure app registration that has been given Storage Blob Data Contributor permissions on the storage for write and Storage Blob Data Reader permissions for read.
 
 #### Implicit Write – using dataframe schema only
 
 This code writes the dataframe df to a CDM folder with a manifest at
-[https://mystorage.dfs.core.windows.net/cdmdata/Contacts/default.manifest.cdm.json](https://mystorage.dfs.core.windows.net/cdmdata/Contacts/default.manifest.cdm.json) with an Event
-entity.
+[https://mystorage.dfs.core.windows.net/cdmdata/Contacts/default.manifest.cdm.json](https://mystorage.dfs.core.windows.net/cdmdata/Contacts/default.manifest.cdm.json) with an Event entity.
 
-Event data is written as Parquet files, compressed with gzip, that are appended to the folder (new files
+Event data is written as parquet files, compressed with gzip, that are appended to the folder (new files
 are added without deleting existing files).
 
 ```scala
@@ -218,13 +215,9 @@ df.write.format("com.microsoft.cdm")
  .save()
 ```
 
-#### Explicit Write - using entity definition in GitHub
+#### Explicit Write - using an entity defined in the CDM GitHub
 
-This code writes the dataframe df to a CDM folder with the manifest at
-[https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json](https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json) and a sub-manifest
-containing the TeamMembership entity, created in a TeamMembership subdirectory.
-TeamMembership data is written as CSV files (by default) that overwrite any existing data files.
-The entity definition is retrieved from the CDM GitHub repo, at:
+This code writes the dataframe df to a CDM folder with the manifest at [https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json](https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json) and a sub-manifest containing the TeamMembership entity, created in a TeamMembership subdirectory. TeamMembership data is written as CSV files (by default) that overwrite any existing data files. The entity definition is retrieved from the CDM GitHub repo, at:
 [https://github.com/microsoft/CDM/tree/master/schemaDocuments/core/applicationCommon/TeamMembership.cdm.json/TeamMembership](https://github.com/microsoft/CDM/tree/master/schemaDocuments/core/applicationCommon/TeamMembership.cdm.json/TeamMembership)
 
 ```scala
@@ -244,12 +237,10 @@ mMembership")
  .save()
 ```
 
-#### Explicit Write - using entity definition in ADLS
+#### Explicit Write - using an entity definition stored in ADLS
 
 This code writes the dataframe df to a CDM folder with manifest at
-[https://mystorage.dfs.core.windows.net/cdmdata/Contacts/root.manifest.cdm.json](https://mystorage.dfs.core.windows.net/cdmdata/Contacts/root.manifest.cdm.json) with the entity
-Person.
-Person data is written as new CSV files (by default) which overwrite existing files in the folder.
+[https://mystorage.dfs.core.windows.net/cdmdata/Contacts/root.manifest.cdm.json](https://mystorage.dfs.core.windows.net/cdmdata/Contacts/root.manifest.cdm.json) with the entity Person. Person data is written as new CSV files (by default) which overwrite existing files in the folder.
 The entity definition is retrieved from
 [https://mystorage.dfs.core.windows.net/models/cdmmodels/core/Contacts/Person.cdm.json/Person](https://mystorage.dfs.core.windows.net/models/cdmmodels/core/Contacts/Person.cdm.json/Person)
 
@@ -271,8 +262,7 @@ df.write.format("com.microsoft.cdm")
 
 #### Read
 
-This code reads the Person entity from the CDM folder with manifest at
-[https://mystorage.dfs.core.windows.net/cdmdata/contacts/root.manifest.cdm.json](https://mystorage.dfs.core.windows.net/cdmdata/contacts/root.manifest.cdm.json)
+This code reads the Person entity from the CDM folder with manifest at [https://mystorage.dfs.core.windows.net/cdmdata/contacts/root.manifest.cdm.json](https://mystorage.dfs.core.windows.net/cdmdata/contacts/root.manifest.cdm.json)
 
 ```scala
 val df = spark.read.format("com.microsoft.cdm")
@@ -291,25 +281,25 @@ val df = spark.read.format("com.microsoft.cdm")
 
 #### Handling Date and Time Formats
 
-Date and Time datatype values are handled as normal for Spark and Parquet, and in CSV are
+Date and Time datatype values are handled as normal for Spark and parquet, and in CSV are
 read/written in ISO 8601 format.
 
 In CDM, DateTime datatype values are *interpreted as UTC*, and in CSV written in ISO 8601 format, e.g.
 2020-03-13 09:49:00Z.
 
 DateTimeOffset values intended for recording local time instants are handled differently in Spark and
-Parquet from CSV. While CSV and other formats can express a local time instant as a structure,
+parquet from CSV. While CSV and other formats can express a local time instant as a structure,
 comprising a datetime and a UTC offset, formatted in CSV like, 2020-03-13 09:49:00-08:00, Parquet and
 Spark don’t support such structures. Instead, they use a TIMESTAMP datatype that allows an instant to
 be recorded in UTC time (or in some unspecified time zone).
 
-The Spark CDM connector will convert a DateTimeOffset value in CSV to a UTC timestamp. This will be persisted as a Timestamp in Parquet and if subsequently persisted to CSV, the value will be serialized as a DateTimeOffset with a +00:00 offset. Importantly, there is no loss of temporal accuracy – the serialized values represent the same instant as the original values, although the offset is lost. Spark systems use their system time as the baseline and normally express time using that local time. UTC
+The Spark CDM connector will convert a DateTimeOffset value in CSV to a UTC timestamp. This will be persisted as a Timestamp in parquet and if subsequently persisted to CSV, the value will be serialized as a DateTimeOffset with a +00:00 offset. Importantly, there is no loss of temporal accuracy – the serialized values represent the same instant as the original values, although the offset is lost. Spark systems use their system time as the baseline and normally express time using that local time. UTC
 times can always be computed by applying the local system offset. Note that for Azure systems in all regions, system time is always UTC, so all timestamp values will normally be in UTC.
 
 As Azure system values are always UTC, when using implicit write, where a CDM definition is derived from a dataframe, timestamp columns are translated to attributes with CDM DateTime datatype, which implies
 a UTC time.
 
-If it is important to persist a local time and the data will be processed in Spark or persisted in Parquet,
+If it is important to persist a local time and the data will be processed in Spark or persisted in parquet,
 then it is recommended to use a DateTime attribute and keep the offset in a separate attribute, for
 example as a signed integer value representing minutes. In CDM, DateTime values are UTC, so the
 offset must be applied when needed to compute local time.
@@ -366,7 +356,7 @@ Implicit Write with sub-manifest:
 
 ## Known issues
 
-- When using Parquet in Azure Databricks, lzo compression is not currently supported.
+- When using parquet in Azure Databricks, lzo compression is not currently supported.
 - When using implicit write, the implied entity definition is written into a subfolder and has
 attributes declared with a CDM data format rather than a CDM data type. These declarations
 will be changed in a later release to use CDM primitive data types as normally used in a CDM
@@ -378,7 +368,7 @@ logical entity definition.
 The following features are not yet supported:
 - Use of headers when reading or writing CSV files and using a separator character other than a comma.
 - Use and configuration of partition patterns for organizing data files on write.
-- Nested Parquet support.
+- Nested parquet support.
 - In explicit write, use of a distinct ADLS storage account for the entity definition. Initially, the
 entity definition must be in the same storage account as the target CDM folder.
 
