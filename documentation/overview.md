@@ -1,6 +1,6 @@
 # Using the Spark CDM Connector
 
-## Limited preview release
+***Limited preview release*** <br/>
 Guide last updated, May 15, 2020
 
 ## Overview
@@ -20,7 +20,9 @@ For information on defining CDM documents using CDM 1.0 see
 [https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector](https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector)\
 [https://github.com/Azure/spark-cdm-connector](https://github.com/Azure/spark-cdm-connector)\
 
-**Apache Spark for Azure Synapse:** the Spark CDM COnnector is pre-installed  and requires no additional installation. 
+**Apache Spark for Azure Synapse:** the Spark CDM Connector is pre-installed and requires no additional installation. 
+
+Note that the latest version of the connector may not be installed in Synapse at any point in time.
 
 Sample code and CDM models are provided in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
 
