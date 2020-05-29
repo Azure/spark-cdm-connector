@@ -11,7 +11,9 @@ To report problems, ask questions or provide feedback, please send mail to asksp
 For more information about CDM see: https://docs.microsoft.com/en-us/common-data-model/ .
 
 # Release notes and updates to content
+Release notes: see [here](https://github.com/Azure/spark-cdm-connector/releases)
 
-[Python sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsamplePython.ipynb) showing how to the use the connector added
+Content updates:
+  - [Python sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsamplePython.ipynb) added showing how to the use the connector
 
-[Using the Spark CDM Connector](https://github.com/Azure/spark-cdm-connector/blob/master/documentation/overview.md) guide updated and now in markdown format 
+  - [Using the Spark CDM Connector](https://github.com/Azure/spark-cdm-connector/blob/master/documentation/overview.md) guide updated and now in markdown format 
