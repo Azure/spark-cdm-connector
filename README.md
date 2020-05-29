@@ -14,6 +14,8 @@ For more information about CDM see: https://docs.microsoft.com/en-us/common-data
 Release notes: see [here](https://github.com/Azure/spark-cdm-connector/releases)
 
 Content updates:
-  - [Python sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsamplePython.ipynb) added showing how to the use the connector
+  - [Python sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsamplePython.ipynb).  Added a Python version of the original Scala sample
 
   - [Using the Spark CDM Connector](https://github.com/Azure/spark-cdm-connector/blob/master/documentation/overview.md) guide updated and now in markdown format 
+  
+  - [Scala sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsample.scala).  Original sample showing several use cases
