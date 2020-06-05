@@ -1,6 +1,6 @@
 # Using the Spark CDM Connector
 
-## Limited preview release
+***Limited preview release*** <br/>
 Guide last updated, May 15, 2020
 
 ## Overview
@@ -18,11 +18,17 @@ For information on defining CDM documents using CDM 1.0 see
 ## Installing the Spark CDM connector
 **Azure Databricks:** the Spark CDM connector library is provided as a jar file in GitHub and Maven that must be installed in an Azure Databricks cluster. 
 [https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector](https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector)\
-[https://github.com/Azure/spark-cdm-connector](https://github.com/Azure/spark-cdm-connector)\
+[https://github.com/Azure/spark-cdm-connector](https://github.com/Azure/spark-cdm-connector)
 
-**Apache Spark for Azure Synapse:** the Spark CDM COnnector is pre-installed  and requires no additional installation. 
+**Apache Spark for Azure Synapse:** the Spark CDM Connector is pre-installed and requires no additional installation. 
 
-Sample code and CDM models are provided in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
+Note that the latest version of the connector may not be installed in Synapse at any point in time.  
+
+Use the API below to retrieve the current version of the Spark CDM Connector and compare with the release notes in GitHub.
+```
+com.microsoft.cdm.BuildInfo.version
+```
+Once installed, sample code and CDM models are provided in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
 
 ## Scenarios
 ### Supported scenarios
@@ -362,6 +368,7 @@ attributes declared with a CDM data format rather than a CDM data type. These de
 will be changed in a later release to use CDM primitive data types as normally used in a CDM
 logical entity definition.
 - Does not yet support general use of alias definitions in import statements; allows the 'cdm' alias to be resolved to the CDM GitHub. 
+- If writing Parquet from Synapse, an additional option is required .option("databricks", false)
 
 ## Not yet supported
 
@@ -376,10 +383,11 @@ entity definition must be in the same storage account as the target CDM folder.
 
 See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample code and CDM files.
 
-## Changes
+## Changes to this doc
 |**Date**  |**Change**|
 |------ |---------|
-|5/4/20 | Clarified that Overwrite and Append save modes do not allow schema change <br/> Clarified in capabilities summary that partition patterns are supported on read not write|
+|5/4/20 | Clarified that Overwrite and Append save modes do not allow schema change <br/> Clarified in capabilities summary that partition patterns are supported on read but not write|
 |5/6/20 | Clarified that on read, entity files of different format are combined into one dataframe|
 |5/11/20|Removed known problem regarding number of rows < executors; fixed in v0.8.|
 |5/15/20|Clarified that aliases are not yet supported <br/> Clarified that schema drift and schema evolution are not supported|
+|6/1/20| Noted that an additional option is required when writing Parquet from Synapse to _Known issues_<br/>Added reference to using API to get the current library version|

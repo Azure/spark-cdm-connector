@@ -8,10 +8,18 @@ To get started, please see: [Using the Spark CDM Connector](documentation/overvi
 
 To report problems, ask questions or provide feedback, please send mail to asksparkcdm@microsoft.com.
 
-For more information about CDM see: https://docs.microsoft.com/en-us/common-data-model/ .
+For more information about CDM see: https://docs.microsoft.com/en-us/common-data-model/ 
+
+# Maven
+The library is also available via Maven: https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector
+The Maven release may be 24-36 hours behind the GitHub release, so check to confirm which is the latest version available on Maven
 
 # Release notes and updates to content
+For release notes: see [here](https://github.com/Azure/spark-cdm-connector/releases)
 
-[Python sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsamplePython.ipynb) showing how to the use the connector added
+Content updates:
+  - [Python sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsamplePython.ipynb).  Added a Python version of the original Scala sample
 
-[Using the Spark CDM Connector](https://github.com/Azure/spark-cdm-connector/blob/master/documentation/overview.md) guide updated and now in markdown format 
+  - [Using the Spark CDM Connector](https://github.com/Azure/spark-cdm-connector/blob/master/documentation/overview.md) guide updated and now in markdown format 
+  
+  - [Scala sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsample.scala).  Original sample showing several use cases
