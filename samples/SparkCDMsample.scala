@@ -1,5 +1,6 @@
 // Databricks notebook source
-import org.apache.spark.sql.types.{BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.types.{ArrayType, BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
 
 val appid = "<appId>"
 val appkey = "<appKey>"
@@ -12,7 +13,7 @@ val storageAccountName = "<storageAccount>.dfs.core.windows.net"
 // COMMAND ----------
 
 // Implicit write case
-import org.apache.spark.sql.types.{BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.types.{ArrayType, BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
 
 // Write a CDM entity with Parquet data files, entity definition is derived from the dataframe schema
 val date= java.sql.Date.valueOf("2015-03-31");
@@ -168,3 +169,82 @@ val readDf2 = spark.read.format("com.microsoft.cdm")
   .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
   .load()
 readDf2.select("*").show()
+
+// COMMAND ----------
+
+// Nested Parquet Implicit & Explicit write
+
+val birthdate= java.sql.Date.valueOf("1991-03-31");
+val now = new java.sql.Timestamp(System.currentTimeMillis());
+val data = Seq(
+
+  Row(13, Row("Donna Carreras", true, 12.34,6L, birthdate, Decimal(22.7), now,  Row("95110", Row("Bose Street", 321), Array(Row("bieber1", 1), Row("bieber2", 2))))) ,
+  Row(24, Row("Keith Harris", false, 12.34,6L, birthdate, Decimal(22.7), now, Row("95134", Row("Estancia Dr", 185), Array(Row("baby1", 3), Row("baby2", 4), Row("baby3", 5), Row("baby4", 6)))))
+)
+
+val schema = new StructType()
+  .add(StructField("id", IntegerType, true))
+  .add(StructField("details", new StructType()
+    .add(StructField("name", StringType, true))
+    .add(StructField("USCitizen", BooleanType, true))
+    .add(StructField("salary", DoubleType, true))
+    .add(StructField("phone", LongType, true))
+    .add(StructField("birthDate", DateType, true))
+    .add(StructField("bodyMassIndex",  DecimalType(5,2), true))
+    .add(StructField("createdTime", TimestampType, true))
+    .add(StructField("address", new StructType()
+      .add(StructField("zipcode", StringType, true))
+      .add(StructField("street", new StructType()
+        .add(StructField("streetName", StringType, true))
+        .add(StructField("streetNumber", IntegerType, true))
+      )
+      )
+      .add(StructField("songs", ArrayType(StructType(List(StructField("name", StringType, true),StructField("number", IntegerType, true))), true), true))
+    )
+    )))
+val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+
+// Implicit write
+df.write.format("com.microsoft.cdm")
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/nestedImplicit/default.manifest.cdm.json")
+  .option("entity", "NestedExampleImplicit")
+  .option("useCdmGithubModelRoot", true)
+  .option("format", "parquet")
+  .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+  .save()
+
+// Explicit write
+// To run this example, first create a /Models/Contacts folder to your demo container in ADLS gen2,
+// then upload the provided NestedExample.cdm.json file
+df.write.format("com.microsoft.cdm")
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/nestedExplicit/default.manifest.cdm.json")
+  .option("entity", "NestedExampleExplicit")
+  .option("entityDefinition", "/Contacts/NestedExample.cdm.json/NestedExample")
+  .option("entityDefinitionModelRoot", "Models")
+  .option("entityDefinitionContainer", container)
+  .option("format", "parquet")
+  .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+  .save()
+
+val readImplicit = spark.read.format("com.microsoft.cdm")
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/nestedImplicit/default.manifest.cdm.json")
+  .option("entity", "NestedExampleImplicit")
+  .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+  .load()
+
+val readExplicit = spark.read.format("com.microsoft.cdm")
+  .option("storage", storageAccountName)
+  .option("container", outputContainer)
+  .option("manifest", "/nestedExplicit/default.manifest.cdm.json")
+  .option("entity", "NestedExampleExplicit")
+  .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+  .load()
+
+readImplicit.show(false)
+readExplicit.show(false)

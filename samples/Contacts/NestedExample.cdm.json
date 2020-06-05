@@ -1,0 +1,150 @@
+{
+  "jsonSchemaSemanticVersion" : "1.0.0",
+  "imports" : [
+    {
+      "corpusPath" : "cdm:/foundations.cdm.json"
+    }
+  ],
+  "definitions" : [
+    {
+      "entityName" : "NestedExample",
+      "hasAttributes" : [
+        {
+          "name" : "id",
+          "dataType" : "integer"
+        },
+        {
+          "entity" : "details",
+          "name" : "details",
+          "resolutionGuidance" : {
+            "imposedDirectives" : [
+              "structured",
+              "noMaxDepth"
+            ],
+            "renameFormat" : "{m}"
+          }
+        }
+      ]
+    },
+    {
+      "entityName" : "details",
+      "hasAttributes" : [
+        {
+          "name" : "name",
+          "dataType" : "string"
+        },
+        {
+          "name" : "USCitizen",
+          "dataType" : "boolean"
+        },
+        {
+          "name" : "salary",
+          "dataType" : "double"
+        },
+        {
+          "name" : "phone",
+          "dataType" : "bigInteger"
+        },
+        {
+          "name" : "birthDate",
+          "dataType" : "date"
+        },
+        {
+          "name" : "bodyMassIndex",
+          "dataType" : "decimal",
+          "appliedTraits" : [
+            {
+              "traitReference" : "is.dataFormat.numeric.shaped",
+              "arguments" : [
+                {
+                  "name" : "precision",
+                  "value" : 5
+                },
+                {
+                  "name" : "scale",
+                  "value" : 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name" : "createdTime",
+          "dataType" : "dateTime"
+        },
+        {
+          "entity" : "address",
+          "name" : "address",
+          "resolutionGuidance" : {
+            "imposedDirectives" : [
+              "structured",
+              "noMaxDepth"
+            ],
+            "renameFormat" : "{m}"
+          }
+        }
+      ]
+    },
+    {
+      "entityName" : "address",
+      "hasAttributes" : [
+        {
+          "name" : "zipcode",
+          "dataType" : "string"
+        },
+        {
+          "entity" : "street",
+          "name" : "street",
+          "resolutionGuidance" : {
+            "imposedDirectives" : [
+              "structured",
+              "noMaxDepth"
+            ],
+            "renameFormat" : "{m}"
+          }
+        },
+        {
+          "entity" : "songs",
+          "name" : "songs",
+          "resolutionGuidance" : {
+            "imposedDirectives" : [
+              "structured",
+              "noMaxDepth"
+            ],
+            "removedDirectives" : [
+              "normalized"
+            ],
+            "cardinality" : "many",
+            "renameFormat" : "{m}"
+          }
+        }
+      ]
+    },
+    {
+      "entityName" : "street",
+      "hasAttributes" : [
+        {
+          "name" : "streetName",
+          "dataType" : "string"
+        },
+        {
+          "name" : "streetNumber",
+          "dataType" : "integer"
+        }
+      ]
+    },
+    {
+      "entityName" : "songs",
+      "hasAttributes" : [
+        {
+          "name" : "name",
+          "dataType" : "string"
+        },
+        {
+          "name" : "number",
+          "dataType" : "integer"
+        }
+      ]
+    }
+  ]
+}
