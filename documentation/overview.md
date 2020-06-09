@@ -313,6 +313,10 @@ offset must be applied when needed to compute local time.
 In most cases, persisting local time is not important. Local times are often only required in a UI for user
 convenience and based on the user’s time zone, so not storing a UTC time is often a better solution.
 
+#### Time value accuracy
+
+The Spark CDM Connector supports time values with seconds having up to 6 decimal places, based on the format of the data either in the file being read (CSV or Parquet) or as defined in the dataframe, enabling accuracy from single seconds to microseconds.
+
 #### Folder organization
 
 When writing CDM folders, the following folder organization is used. Data files are written into a single data folder. Options for organizing data files into subfolders will be supported in a later release.
