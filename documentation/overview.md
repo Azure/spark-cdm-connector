@@ -73,7 +73,7 @@ Partitions for any given entity can be in different formats, for example, a mix 
 When writing to a CDM folder, if the entity does not already exist in the CDM folder, a new entity and definition is created and added to the CDM folder and referenced in the manifest. Two writing modes are supported:
 
 **Explicit write**: the physical entity definition is based on a reference to an entity that you specify.
-- If the dataframe structure does not match the referenced entity definition, an error is returned.
+- If the dataframe structure does not match the referenced entity definition, an error is returned.  Ensure that attribute datatypes match fields in the dataframe, including precision and scale which is set via traits.
 - If the dataframe is valid -
   - If the entity already exists in the manifest, the provided entity definition is
 resolved and validated against the definition in the CDM folder. If the
@@ -127,6 +127,8 @@ In Azure Databricks, create a secret scope which can be backed by Azure Key Vaul
 #### Common options
 
 The following options identify the entity in the CDM folder that is either being read or written to.
+
+**IMPORTANT** Folder and file names in options should be URL-encoded, for example, use %20 in place of a space.
 
 |**Option**  |**Description**  |**Pattern and example usage**  |
 |---------|---------|:---------:|
@@ -364,7 +366,7 @@ Implicit Write with sub-manifest:
             +-- <entity>.cdm.json       << logical entity definition(s)
 ```
 
-## Known issues
+## Troubleshooting and Known issues
 
 - When using parquet in Azure Databricks, lzo compression is not currently supported.
 - When using implicit write, the implied entity definition is written into a subfolder and has
@@ -373,6 +375,8 @@ will be changed in a later release to use CDM primitive data types as normally u
 logical entity definition.
 - Does not yet support general use of alias definitions in import statements; allows the 'cdm' alias to be resolved to the CDM GitHub. 
 - If writing Parquet from Synapse, an additional option is required .option("databricks", false)
+- Ensure folder and file names are URL encoded if spaces or special characters are used.
+- Ensure the decimal precision and scale of decimal data type fields used in the dataframe match the data type used in the CDM entity definition - requires pecision and scale traits are defined on the data type.  If the precision and scale are not defined explicitly in CDM, the default is Decimal(18,4)   
 
 ## Not yet supported
 
@@ -395,3 +399,4 @@ See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample 
 |5/11/20|Removed known problem regarding number of rows < executors; fixed in v0.8.|
 |5/15/20|Clarified that aliases are not yet supported <br/> Clarified that schema drift and schema evolution are not supported|
 |6/1/20| Noted that an additional option is required when writing Parquet from Synapse to _Known issues_<br/>Added reference to using API to get the current library version|
+|6/23/20| Noted that folder and file names must be URL encoded, decimal precision and scale must match CDM datatypes used.|
