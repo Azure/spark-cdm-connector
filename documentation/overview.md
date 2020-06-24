@@ -5,8 +5,7 @@ Guide last updated, June 23, 2020
 
 ## Overview
 
-The Spark CDM Connector enables a Spark program to read and write CDM entities in a CDM folder via dataframes. In principle, the Spark CDM Connector will work in any Spark environment, however this limited preview release has only been tested with and is only supported with Azure Databricks
-and Apache Spark in Azure Synapse. 
+The Spark CDM Connector enables a Spark program to read and write CDM entities in a CDM folder via dataframes. In principle, the Spark CDM Connector will work in any Spark environment, however this limited preview release has only been tested with and is only supported with Azure Databricks and Apache Spark in Azure Synapse. 
 
 **During this limited preview, use of the Spark CDM Connector in production applications is not recommended or supported.** 
 
@@ -24,7 +23,7 @@ For information on defining CDM documents using CDM 1.0 see
 
 Note that the latest version of the connector may not be installed in Synapse at any point in time.  
 
-Use the API below to retrieve the current version of the Spark CDM Connector and compare with the release notes in GitHub.
+Use the API below to retrieve the current version of the Spark CDM Connector and compare with the [release notes](https://github.com/Azure/spark-cdm-connector/releases) in GitHub.
 ```
 com.microsoft.cdm.BuildInfo.version
 ```
