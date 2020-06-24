@@ -1,7 +1,7 @@
 # Using the Spark CDM Connector
 
 ***Limited preview release*** <br/>
-Guide last updated, May 15, 2020
+Guide last updated, June 23, 2020
 
 ## Overview
 
