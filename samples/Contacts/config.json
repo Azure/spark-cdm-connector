@@ -1,0 +1,18 @@
+{
+  "defaultNamespace" : "adls",
+  "adapters" : [
+    {
+      "type" : "adls",
+      "config" : {
+        "hostname" : "srichetastorage.dfs.core.windows.net",
+        "root" : "/outputsubmanifest/example-public-standards",
+        "tenant" : "72f988bf-86f1-41af-91ab-2d7cd011db47",
+        "clientId" : "6c3f525f-bdcb-4677-bed6-24f0b43add13",
+        "timeout" : 5000,
+        "maximumTimeout" : 20000,
+        "numberOfRetries" : 2
+      },
+      "namespace" : "core"
+    }
+  ]
+}

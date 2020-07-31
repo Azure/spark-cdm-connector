@@ -1,0 +1,17 @@
+{
+    "jsonSchemaSemanticVersion": "1.0.0",
+    "imports": [
+        {
+            "corpusPath": "cdm:/foundations.cdm.json"
+        },
+        {
+            "corpusPath": "Customer.cdm.json"
+        },
+        {
+            "corpusPath": "CustomerCategory.cdm.json"
+        },
+        {
+            "corpusPath": "core:/TrackedEntity.cdm.json"
+        }
+    ]
+}

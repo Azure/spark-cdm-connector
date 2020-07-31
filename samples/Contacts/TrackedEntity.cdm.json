@@ -1,0 +1,28 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/CDM/master/schemaDocuments/schema.cdm.json",
+    "jsonSchemaSemanticVersion": "1.0.0",
+    "imports": [
+        {
+            "corpusPath": "cdm:/foundations.cdm.json"
+        }
+    ],
+    "definitions": [
+        {
+            "description": "An entity whose modification is tracked ",
+            "entityName": "TrackedEntity",
+            "hasAttributes": [
+                {
+                    "purpose": "modifiedOn",
+                    "dataType": "dateTime",
+                    "name": "ValidFrom",
+                    "description": "The date from which this record is valid"
+                },
+                {
+                    "purpose": "hasA",
+                    "dataType": "dateTime",
+                    "name": "ValidTo",
+                    "description": "The date to which this record was valid"                }
+            ]
+        }
+    ]
+}

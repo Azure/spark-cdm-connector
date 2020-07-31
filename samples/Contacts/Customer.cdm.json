@@ -1,0 +1,50 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/CDM/master/schemaDocuments/schema.cdm.json",
+    "jsonSchemaSemanticVersion": "1.0.0",
+    "imports": [
+        {
+            "corpusPath": "_salesimports.cdm.json"
+        }
+    ],
+    "definitions": [
+        {
+            "entityName": "Customer",
+            "extendsEntity":"TrackedEntity",
+            "hasAttributes": [
+                {
+                    "purpose": "hasA",
+                    "dataType": "integer",
+                    "name": "CustomerId",
+                    "description": "Customer identifier"
+                },
+                {
+                    "purpose": "hasA",
+                    "dataType": "string",
+                    "name": "CustomerName",
+                    "displayName": "Name ",
+                    "maximumLength": 100
+                },
+                {
+                    "purpose": "hasA",
+                    "dataType": "decimal",
+                    "name": "CreditLimit",
+                    "appliedTraits": [
+                        {
+                            "traitReference": "is.dataFormat.numeric.shaped",
+                            "arguments": [
+                                {
+                                    "name": "precision",
+                                    "value": "18"
+                                },
+                                {
+                                    "name": "scale",
+                                    "value": "2"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
