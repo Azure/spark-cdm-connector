@@ -3,6 +3,8 @@
 ***Limited preview release*** <br/>
 Guide last updated, July 31, 2020
 
+**NOTE:  This latest version describes changes made in the 1.0.16 version of the Spark CDM Connector.  This includes several breaking changes to the options that simplify the options used.  Code using earlier versions of library may need to be modified to use the revised options.**
+
 ## Overview
 
 The Spark CDM Connector enables a Spark program to read and write CDM entities in a CDM folder via dataframes. In principle, the Spark CDM Connector will work in any Spark environment, however this limited preview release has only been tested with and is only supported with Azure Databricks and Apache Spark in Azure Synapse. 
@@ -46,6 +48,7 @@ The following capabilities or limitations apply:
 - Supports sub-manifests on read, optional use of entity-scoped submanifests on write.
 - Supports writing data using user modifiable partition patterns.
 - Supports use of managed identity (Synapse), user identity (Azure Databricks) and credentials 
+- Supports resolving CDM aliases locations used in imports using adapter definitions in a config.json
 
 See also _Known issues_ section at the end of this document.
 
@@ -128,8 +131,7 @@ Here's an example of how the connector is used for read, showing some of the opt
 ```scala
 val readDf = spark.read.format("com.microsoft.cdm")
   .option("storage", "mystorageaccount.dfs.core.windows.net")
-  .option("container", "customerleads")
-  .option("manifest", "default.manifest.cdm.json")
+  .option("manifestPath", "customerleads/default.manifest.cdm.json")
   .option("entity", "Customer")
   .load()
 ```
@@ -159,12 +161,11 @@ The following options identify the entity in the CDM folder that is either being
 
 |**Option**  |**Description**  |**Pattern and example usage**  |
 |---------|---------|:---------:|
-|storage|The endpoint URL for then ADLS gen2 storage account *with HNS enabled* in which the CDM folder is located.  <br/>Use the **dfs**.core.windows.net URL | \<accountName\>.dfs.core.windows.net "myAccount.dfs.core.windows.net"        |
-|container|An storage container/file system in which the source or target CDM folder is located | \<containerName\> <br/>"myContainer"        |
-|manifest|The relative path to the manifest or model.json file from the container root. For read, can be a root manifest or a sub-manifest. For write, must be the root manifest.|[\<folderPath\>]/fullManifestName, <br/>"default.manifest.cdm.json" "employees.manifest.cdm.json" <br/> "employees/person.manifest.cdm.json" <br/>"employees/model.json" (read only)         |
+|storage|The endpoint URL for then ADLS gen2 storage account *with HNS enabled* in which the CDM folder is located.  <br/>Use the **dfs**.core.windows.net URL | \<accountName\>.dfs.core.windows.net "myAccount.dfs.core.windows.net"|
+|manifestPath|The relative path to the manifest or model.json file in the storage account. For read, can be a root manifest or a sub-manifest. For write, must be the root manifest.|\<container\>/{\<folderPath\>/}\<manifestFileName>, <br/>"mycontainer/default.manifest.cdm.json" "models/hr/employees.manifest.cdm.json" <br/> "models/hr/employees/model.json" (read only)         |
 |entity| The name of the source or target entity in the manifest. When writing an entity for the first time in a folder, the resolved entity definition will be given this name. | \<entityName\> <br/>"customer"|
 
-NOTE: you no-longer need to specify a logical entity entity definition in addition to the physical entity in the CDM folder on read.
+NOTE: you no-longer need to specify a logical entity entity definition in addition to the physical entity definition in the CDM folder on read.
 
 #### Explicit write options
 
@@ -174,11 +175,10 @@ The following options identify the logical entity definition that defines the en
 |**Option**  |**Description**  |**Pattern / example usage**  |
 |---------|---------|:---------:|
 |*entityDefinitionStorage [NOT YET SUPPORTED]*|*The ADLS gen2 storage account containing the entity definition. Required if different to the storage account hosting the CDM folder.*|*\<accountName\>.dfs.core.windows.net*<br/>_"myAccount.dfs.core.windows.net"_|
-|entityDefinitionContainer|The storage container/file system containing the entity definition. Required if different to the CDM folder container.| \<containerName><br/> "models"|
-|entityDefinitionModelRoot|The location of the model root or corpus within the container. If not specified, defaults to the root folder.|\<folderPath\> <br/> "crm/core"<br/> (use "/" for the root folder of the container)|
-|entityDefinition|Location of the entity. File path to the CDM definition file relative to the model root, including the name of the entity in that file.|\<folderPath\>/\<entityName\>.cdm.json/\<entityName\><br/>"sales/customer.cdm.json/customer"|
+|entityDefinitionModelRoot|The location of the model root or corpus within the account. |\<container\>/\<folderPath\> <br/> "crm/core"<br/>|
+|entityDefinitionPath|Location of the entity. File path to the CDM definition file relative to the model root, including the name of the entity in that file.|\<folderPath\>/\<entityName\>.cdm.json/\<entityName\><br/>"sales/customer.cdm.json/customer"|
 configPath| The container and folder path to a config.json file that contains the adapter configurations for all aliases included in the entity definition file and any directly or indirectly referenced CDM files. **Not required if the config.json is in the model root folder.**| \<container\>\<folderPath\>|
-|useCdmStandardModelRoot | Indicates the model root is located at [https://github.com/microsoft/CDM/tree/master/schemaDocuments](https://github.com/microsoft/CDM/tree/master/schemaDocuments) <br/>Used to reference entity types defined in the CDM GitHub.<br/>***Overrides:*** entityDefinitionStorage, entityDefinitionContainer, entityDefinitionModelRoot if specified.| "useCdmGithubModelRoot" |
+|useCdmStandardModelRoot | Indicates the model root is located at [https://cdm-schema.microsoft.com/CDM/logical/](https://github.com/microsoft/CDM/tree/master/schemaDocuments) <br/>Used to reference entity types defined in the CDM Content Delivery Network (CDN).<br/>***Overrides:*** entityDefinitionStorage, entityDefinitionModelRoot if specified.| "useCdmStandardModelRoot" |
 |cdmSource|Defines how the 'cdm' alias if present in CDM definition files is resolved. If this option is used, it overrides any _cdm_ adapter specified in the config.json file.  Values are "builtin" or "referenced".  <br/> If set to _referenced_, then the latest published standard CDM definitions at https://cdm-schema.microsoft.com/logical/ are used.  If set to _builtin_ then the CDM base definitions built-in to the CDM object model used by the Spark CDM Connector will be used. <br/> Note: <br/> 1). The Spark CDM Connector may not be using the latest CDM SDK so may not contain the latest published standard definitions. <br/> 2). The built-in definitions only include the top-level CDM content such as foundations.cdm.json, primitives.cdm.json, etc.  If you wish to use lower-level standard CDM definitions, either use _referenced_ or include a cdm adapter in the config.json.| "builtin"\|"referenced". |     
 
 In the example above, the full path to the customer entity definition object is ```
@@ -230,8 +230,7 @@ This code reads the Person entity from the CDM folder with manifest in mystorage
 ```scala
 val df = spark.read.format("com.microsoft.cdm")
  .option("storage", "mystorage.dfs.core.windows.net")
- .option("container", "cdmdata")
- .option("manifest", "/contacts/root.manifest.cdm.json")
+ .option("manifestPath", "cdmdata/contacts/root.manifest.cdm.json")
  .option("entity", "Person")
  .load()
 ```
@@ -246,8 +245,7 @@ are added without deleting existing files).
 
 df.write.format("com.microsoft.cdm")
  .option("storage", "mystorage.dfs.core.windows.net")
- .option("container", "cdmdata")
- .option("manifest", "/Contacts/default.manifest.cdm.json")
+ .option("manifestPath", "cdmdata/Contacts/default.manifest.cdm.json")
  .option("entity", "Event")
  .option("format", "parquet")
  .option("compression", "gzip")
@@ -264,29 +262,26 @@ The entity definition is retrieved from
 ```scala
 df.write.format("com.microsoft.cdm")
  .option("storage", "mystorage.dfs.core.windows.net")
- .option("container", "cdmdata")
- .option("manifest", "/contacts/root.manifest.cdm.json")
+ .option("manifestPath", "cdmdata/contacts/root.manifest.cdm.json")
  .option("entity", "Person")
- .option("entityDefinitionContainer", "cdmmodels")
- .option("entityDefinitionModelRoot", "core")
- .option("entityDefinition", "/Contacts/Person.cdm.json/Person")
+ .option("entityDefinitionModelRoot", "cdmmodels/core")
+ .option("entityDefinitionPath", "/Contacts/Person.cdm.json/Person")
  .mode(SaveMode.Overwrite)
  .save()
 ```
 #### Explicit Write - using an entity defined in the CDM GitHub
 
-This code writes the dataframe _df_ to a CDM folder with the manifest at [https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json](https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json) and a sub-manifest containing the TeamMembership entity, created in a TeamMembership subdirectory. TeamMembership data is written as CSV files (by default) that overwrite any existing data files. The entity definition is retrieved from the CDM GitHub repo, at:
-[https://github.com/microsoft/CDM/tree/master/schemaDocuments/core/applicationCommon/TeamMembership.cdm.json/TeamMembership](https://github.com/microsoft/CDM/tree/master/schemaDocuments/core/applicationCommon/TeamMembership.cdm.json/TeamMembership)
+This code writes the dataframe _df_ to a CDM folder with the manifest at [https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json](https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json) and a sub-manifest containing the TeamMembership entity, created in a TeamMembership subdirectory. TeamMembership data is written as CSV files (by default) that overwrite any existing data files. The entity definition is retrieved from the CDM CDN, at:
+[https://cdm-schema.microsoft.com/logical//schemaDocuments/core/applicationCommon/TeamMembership.cdm.json/TeamMembership](https://cdm-schema.microsoft.com/logical//core/applicationCommon/TeamMembership.cdm.json/TeamMembership)
 
 ```scala
 df.write.format("com.microsoft.cdm")
  .option("storage", "mystorage.dfs.core.windows.net")
- .option("container", "cdmdata")
- .option("manifest", "Teams/root.manifest.cdm.json")
+ .option("manifestPath", "cdmdata/Teams/root.manifest.cdm.json")
  .option("entity", "TeamMembership")
- .option("entityDefinition", "core/applicationCommon/TeamMembership.cdm.json/Tea
+ .option("useCdmStandardModelRoot", true)
+ .option("entityDefinitionPath", "core/applicationCommon/TeamMembership.cdm.json/Tea
 mMembership")
- .option("useCdmGithubModelRoot", true)
  .option("useSubManifest", true)
  .mode(SaveMode.Overwrite)
  .save()
@@ -405,7 +400,7 @@ Data file names are based on the following pattern: \<entity\>-\<jobid\>-*.\<fil
 The following features are not yet supported:
 - Overriding a timestamp column to be interpreted as a CDM Time rather than a DateTime is initially supported for CSV files only.  Support for writing Time data to Parquet will be added in a later release.
 - In explicit write, the container for the entity definition must be in the same ADLS storage account as the target CDM folder.  Support for the entity definition being in a different storage account will be added in a later release.
-- Parquet Maptype and arrays of primitive types are not currently supported by CDM so are not supported by the Spark CDM Connector.
+- Parquet Maptype and arrays of primitive types and arrays of array types are not currently supported by CDM so are not supported by the Spark CDM Connector.
 - Spark 3.0.
 
 ## Samples
