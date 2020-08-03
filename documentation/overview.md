@@ -3,7 +3,7 @@
 ***Limited preview release*** <br/>
 Guide last updated, July 31, 2020
 
-**NOTE:  This latest version describes changes made in the 1.0.16 version of the Spark CDM Connector.  This includes several breaking changes to the options that simplify the options used.  Code using earlier versions of library may need to be modified to use the revised options.**
+**NOTE:  This latest version of the doc includes changes made in the 1.0.16 version of the Spark CDM Connector that simplify the options.  These include several breaking changes.  Code written that uses earlier versions of the connector may need to be modified for the revised options.**
 
 ## Overview
 
