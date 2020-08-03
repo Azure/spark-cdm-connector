@@ -256,8 +256,8 @@ df.write.format("com.microsoft.cdm")
 
 This code writes the dataframe _df_ to a CDM folder with manifest at
 [https://mystorage.dfs.core.windows.net/cdmdata/Contacts/root.manifest.cdm.json](https://mystorage.dfs.core.windows.net/cdmdata/Contacts/root.manifest.cdm.json) with the entity Person. Person data is written as new CSV files (by default) which overwrite existing files in the folder.
-The entity definition is retrieved from
-[https://mystorage.dfs.core.windows.net/models/cdmmodels/core/Contacts/Person.cdm.json/Person](https://mystorage.dfs.core.windows.net/models/cdmmodels/core/Contacts/Person.cdm.json/Person)
+The Person entity definition is retrieved from
+[https://mystorage.dfs.core.windows.net/models/cdmmodels/core/Contacts/Person.cdm.json](https://mystorage.dfs.core.windows.net/models/cdmmodels/core/Contacts/Person.cdm.json)
 
 ```scala
 df.write.format("com.microsoft.cdm")
@@ -271,8 +271,8 @@ df.write.format("com.microsoft.cdm")
 ```
 #### Explicit Write - using an entity defined in the CDM GitHub
 
-This code writes the dataframe _df_ to a CDM folder with the manifest at [https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json](https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json) and a sub-manifest containing the TeamMembership entity, created in a TeamMembership subdirectory. TeamMembership data is written as CSV files (by default) that overwrite any existing data files. The entity definition is retrieved from the CDM CDN, at:
-[https://cdm-schema.microsoft.com/logical//schemaDocuments/core/applicationCommon/TeamMembership.cdm.json/TeamMembership](https://cdm-schema.microsoft.com/logical//core/applicationCommon/TeamMembership.cdm.json/TeamMembership)
+This code writes the dataframe _df_ to a CDM folder with the manifest at [https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json](https://mystorage.dfs,core.windows.net/cdmdata/Teams/root.manifest.cdm.json) and a sub-manifest containing the TeamMembership entity, created in a TeamMembership subdirectory. TeamMembership data is written to CSV files (the default) that overwrite any existing data files. The TeamMembership entity definition is retrieved from the CDM CDN, at:
+[https://cdm-schema.microsoft.com/logical/core/applicationCommon/TeamMembership.cdm.json](https://cdm-schema.microsoft.com/logical/core/applicationCommon/TeamMembership.cdm.json)
 
 ```scala
 df.write.format("com.microsoft.cdm")
