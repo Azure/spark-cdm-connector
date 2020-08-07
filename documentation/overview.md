@@ -190,7 +190,7 @@ If a logical entity definition is not specified on write, the entity will be wri
 
 When writing implicitly, a timestamp column will normally be interpreted as a CDM DateTime datatype.  This can be overridden to create an attribute of CDM Time datatype by providing a metadata object associated with the column that specifies the datatype.  See Handling CDM Time data below for details.  
 
-Note that initially, this is supported for CSV files only.  Support for writing Time data to Parquet will be added in a later release.  
+Note that initially, this is supported for CSV files only.  Support for writing time data to Parquet will be added in a later release.  
 
 #### Folder structure and data format options
 
@@ -334,13 +334,19 @@ StructField(“ATimeColumn”, TimeStampType, true, md))
 
 The Spark CDM Connector supports time values in either DateTime or Time with seconds having up to 6 decimal places, based on the format of the data either in the file being read (CSV or Parquet) or as defined in the dataframe, enabling accuracy from single seconds to microseconds.
 
-#### Folder and file organization
+#### Folder and file naming and organization
 
 When writing CDM folders, the default folder organization illustrated below is used. 
 
 By default, data files are written into folders created for the current date, named like '2010-07-31'.  The folder structure and names can be customized using the dateFolderFormat option, described earlier.  
 
 Data file names are based on the following pattern: \<entity\>-\<jobid\>-*.\<fileformat\>.
+
+The number of data partitions written can be controlled using the sparkContext.parallelize() method.  The number of partitions is either determined by the number of executors in the Spark cluster or can be specified explicitly. The Scala example below creates a dataframe with two partitions.
+```scala
+val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
+```
+
 
 **Explicit Write** (defined by a referenced entity definition)
 ```
