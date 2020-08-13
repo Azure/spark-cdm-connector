@@ -400,6 +400,7 @@ val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
 - When using parquet in Azure Databricks, lzo compression is not currently supported.
 - Ensure the decimal precision and scale of decimal data type fields used in the dataframe match the data type used in the CDM entity definition - requires precision and scale traits are defined on the data type.  If the precision and scale are not defined explicitly in CDM, the default used is Decimal(18,4).  For model.json files, Decimal is assumed to be Decimal(18,4).
 - Folder and file names in the options below should not include spaces or special characters, such as "=": manifestPath, entityDefinitionModelRoot, entityDefinitionPath, dataFolderFormat.
+- There is a problem that prevents access to the CDM CDN from Azure Databricks.  To work around this, when the option _useCdmStandardModelRoot_ is used with an application running in Azure Databricks, the model root is automatically resolved by the connector using the GitHub adapter to https://github.com/microsoft/CDM/tree/master/schemaDocuments, not to the equivalent location in the CDM CDN.  Once this issue is resolved, the CDM Standards reference will resolve to the CDN as described in this doc.  This issue and the change should not impact code that uses this option.  This problem does not impact applications running in Synapse, which use the CDM CDN adapter as described.
 
 ## Not yet supported
 
