@@ -5,7 +5,7 @@ Guide last updated, August 14, 2020
 
 **NOTE:  This latest version of the doc applies to the 0.17 version of the Spark CDM Connector.**  
 
-**NOTE: In the 0.16 version and there were several simplicifations to the connector options sveral of which are breaking changes.  Code written that uses earlier versions of the connector may need to be modified for the revised options.**
+**NOTE: The 0.16 version simplified several of the connector options.  Code written that uses earlier versions of the connector may need to be modified to use the revised options introduced in 0.16.**
 
 ## Overview
 
