@@ -69,9 +69,11 @@ The Spark CDM connector is used to modify normal Spark dataframe read and write 
 
 ### Reading data
 
-When reading data, the library uses metadata in the CDM folder to create the dataframe based on the structure of the source entity. Entity attribute names are used as column names and attribute datatypes are mapped to the column datatype. When the dataframe is loaded it is populated from the entity partitions identified in the manifest.
+When reading data, the connector uses metadata in the CDM folder to create the dataframe based on the resolved entity definition for the specified entity, as referenced in the manifest. Entity attribute names are used as dataframe column names and attribute datatypes are mapped to the column datatype. When the dataframe is loaded it is populated from the entity partitions identified in the manifest.
 
-Partitions for any given entity can be in different formats, for example, a mix of CSV and parquet files. Regardless of format, all the entity data files identified in the manifest are combined into one dataset and loaded to the dataframe.
+The connector looks in the specified manifest and any first-level submanifests for the specified entity.  If the required entity is in a second-level or lower submanifest, or if there are multiple entities of the same name in different submanifests, then you should specify the submanifest that contains the required entity rather than the root manifest.        
+
+Entity partitions can be in a mix of formats, for example, a mix of CSV and parquet files. All the entity data files identified in the manifest are combined into one dataset regardless of format and loaded to the dataframe.
 
 ### Writing Data
 
