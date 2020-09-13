@@ -1,9 +1,9 @@
 # Using the Spark CDM Connector
 
 ***Limited preview release*** <br/>
-Guide last updated, Sept 10, 2020
+Guide last updated, Sept 12, 2020
 
-**NOTE:  This latest version of the doc applies to the 0.17 version of the Spark CDM Connector.**  
+**NOTE:  This latest release of the doc applies to the 0.17 version of the Spark CDM Connector.**  
 
 **NOTE: The 0.16 version simplified several of the connector options.  Code written that uses earlier versions of the connector may need to be modified to use the revised options introduced in 0.16.**
 
@@ -19,9 +19,6 @@ For information on defining CDM documents using CDM 1.0 see
 [https://docs.microsoft.com/en-us/common-data-model/](https://docs.microsoft.com/en-us/common-data-model/).
 
 ## Installing the Spark CDM connector
-**Azure Databricks:** the Spark CDM connector library is provided as a jar file in GitHub and Maven that must be installed in an Azure Databricks cluster. 
-[https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector](https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector)\
-[https://github.com/Azure/spark-cdm-connector](https://github.com/Azure/spark-cdm-connector)
 
 **Apache Spark for Azure Synapse:** the Spark CDM Connector is pre-installed and requires no additional installation. 
 
@@ -29,6 +26,13 @@ Note that there may be a delay before the latest version of the connector is ava
 ```
 com.microsoft.cdm.BuildInfo.version
 ```
+
+**Azure Databricks:** the Spark CDM connector is provided as a jar file in GitHub and Maven that must be installed in an Azure Databricks cluster. 
+[https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector](https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector)\
+[https://github.com/Azure/spark-cdm-connector](https://github.com/Azure/spark-cdm-connector)
+
+**NOTE: The Spark CDM Connector does not yet support Spark 3.0. **
+
 Once installed, sample code and CDM models are available in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
 
 ## Scenarios
@@ -434,3 +438,4 @@ See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample 
 |7/31/20| _Updates for v0.16_<br/>Managed identities and user identities are supported for access control, the use of credential options is now optional; <br/>Support for CSV column headers and customizing the delimiter;<br/>Removed the required to provide a reference to a logical entity definition when reading an entity; <br/> CDM files that use aliases in import statements are now resolved using adapter definitions from a config.json file; <br/> Standard base CDM datatype and trait definitions (foundations.cdm.json) can now be resolved from the built-in set in the CDM object model or from the CDM public CDN location using a new cdmSource option - this replaces the useCdmGithub option;<br/> Nested parquet is supported based on structured resolution guidance in CDM;<br/> The overwrite save mode now overwrites the schema if it is changed rather than reporting an error;<br/>On write, data files are recorded in the manifest using a partition pattern entry rather than individual partition entries; <br/> On write, the data folder structue and names are user definable;<br/>Spaces are now handled in file and folder names without requiring URL-encoding;<br/> There is no longer a requirement to specify the .option("databricks", false) when writing Parquet from Synapse.|
 |8/14/20|_Updates for v0.17_<br/> entityDefinitionStorage option is now supported;<br/>Added Known Issue preventing resolution of the CDM CDN in Azure Databricks.|
 |9/10/20|Noted that the submanifest containing the source entity must be explicitly specified on read if the entity is in a second or lower level manifest or if the source entity exists in multiple submanifests|
+|9/12/20|Noted that that Spark 3.0 is not yet supported.|
