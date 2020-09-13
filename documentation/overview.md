@@ -1,7 +1,7 @@
 # Using the Spark CDM Connector
 
 ***Limited preview release*** <br/>
-Guide last updated, August 14, 2020
+Guide last updated, Sept 10, 2020
 
 **NOTE:  This latest version of the doc applies to the 0.17 version of the Spark CDM Connector.**  
 
@@ -165,8 +165,8 @@ The following options identify the entity in the CDM folder that is either being
 
 |**Option**  |**Description**  |**Pattern and example usage**  |
 |---------|---------|:---------:|
-|storage|The endpoint URL for then ADLS gen2 storage account *with HNS enabled* in which the CDM folder is located.  <br/>Use the **dfs**.core.windows.net URL | \<accountName\>.dfs.core.windows.net "myAccount.dfs.core.windows.net"|
-|manifestPath|The relative path to the manifest or model.json file in the storage account. For read, can be a root manifest or a sub-manifest. For write, must be the root manifest.|\<container\>/{\<folderPath\>/}\<manifestFileName>, <br/>"mycontainer/default.manifest.cdm.json" "models/hr/employees.manifest.cdm.json" <br/> "models/hr/employees/model.json" (read only)         |
+|storage|The endpoint URL for the ADLS gen2 storage account *with HNS enabled* in which the CDM folder is located.  <br/>Use the **dfs**.core.windows.net URL | \<accountName\>.dfs.core.windows.net "myAccount.dfs.core.windows.net"|
+|manifestPath|The relative path to the manifest or model.json file in the storage account. For read, can be a root manifest or a sub-manifest or a model.json. For write, must be a root manifest.|\<container\>/{\<folderPath\>/}\<manifestFileName>, <br/>"mycontainer/default.manifest.cdm.json" "models/hr/employees.manifest.cdm.json" <br/> "models/hr/employees/model.json" (read only)         |
 |entity| The name of the source or target entity in the manifest. When writing an entity for the first time in a folder, the resolved entity definition will be given this name. | \<entityName\> <br/>"customer"|
 
 NOTE: you no-longer need to specify a logical entity entity definition in addition to the physical entity definition in the CDM folder on read.
@@ -433,3 +433,4 @@ See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample 
 |6/23/20| Noted that folder and file names must be URL encoded, <br/> Decimal precision and scale must match CDM datatypes used.|
 |7/31/20| _Updates for v0.16_<br/>Managed identities and user identities are supported for access control, the use of credential options is now optional; <br/>Support for CSV column headers and customizing the delimiter;<br/>Removed the required to provide a reference to a logical entity definition when reading an entity; <br/> CDM files that use aliases in import statements are now resolved using adapter definitions from a config.json file; <br/> Standard base CDM datatype and trait definitions (foundations.cdm.json) can now be resolved from the built-in set in the CDM object model or from the CDM public CDN location using a new cdmSource option - this replaces the useCdmGithub option;<br/> Nested parquet is supported based on structured resolution guidance in CDM;<br/> The overwrite save mode now overwrites the schema if it is changed rather than reporting an error;<br/>On write, data files are recorded in the manifest using a partition pattern entry rather than individual partition entries; <br/> On write, the data folder structue and names are user definable;<br/>Spaces are now handled in file and folder names without requiring URL-encoding;<br/> There is no longer a requirement to specify the .option("databricks", false) when writing Parquet from Synapse.|
 |8/14/20|_Updates for v0.17_<br/> entityDefinitionStorage option is now supported;<br/>Added Known Issue preventing resolution of the CDM CDN in Azure Databricks.|
+|9/10/20|Noted that the submanifest containing the source entity must be explicitly specified on read if the entity is in a second or lower level manifest or if the source entity exists in multiple submanifests|
