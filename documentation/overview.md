@@ -171,7 +171,7 @@ The following options identify the entity in the CDM folder that is either being
 |---------|---------|:---------:|
 |storage|The endpoint URL for the ADLS gen2 storage account *with HNS enabled* in which the CDM folder is located.  <br/>Use the **dfs**.core.windows.net URL | \<accountName\>.dfs.core.windows.net "myAccount.dfs.core.windows.net"|
 |manifestPath|The relative path to the manifest or model.json file in the storage account. For read, can be a root manifest or a sub-manifest or a model.json. For write, must be a root manifest.|\<container\>/{\<folderPath\>/}\<manifestFileName>, <br/>"mycontainer/default.manifest.cdm.json" "models/hr/employees.manifest.cdm.json" <br/> "models/hr/employees/model.json" (read only)         |
-|entity| The name of the source or target entity in the manifest. When writing an entity for the first time in a folder, the resolved entity definition will be given this name. | \<entityName\> <br/>"customer"|
+|entity| The name of the source or target entity in the manifest. When writing an entity for the first time in a folder, the resolved entity definition will be given this name.  Entity name is case sensitive.| \<entityName\> <br/>"customer"|
 
 NOTE: you no-longer need to specify a logical entity entity definition in addition to the physical entity definition in the CDM folder on read.
 
