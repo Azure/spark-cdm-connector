@@ -418,7 +418,6 @@ val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
 
 The following features are not yet supported:
 - Overriding a timestamp column to be interpreted as a CDM Time rather than a DateTime is initially supported for CSV files only.  Support for writing Time data to Parquet will be added in a later release.
-- In explicit write, the container for the entity definition must be in the same ADLS storage account as the target CDM folder.  Support for the entity definition being in a different storage account will be added in a later release.
 - Parquet Maptype and arrays of primitive types and arrays of array types are not currently supported by CDM so are not supported by the Spark CDM Connector.
 - Spark 3.0.
 
