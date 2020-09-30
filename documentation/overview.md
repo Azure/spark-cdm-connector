@@ -187,7 +187,7 @@ The following options identify the logical entity definition that defines the en
 |entityDefinitionPath|Location of the entity. File path to the CDM definition file relative to the model root, including the name of the entity in that file.|\<folderPath\>/\<entityName\>.cdm.json/\<entityName\><br/>"sales/customer.cdm.json/customer"|
 configPath| The container and folder path to a config.json file that contains the adapter configurations for all aliases included in the entity definition file and any directly or indirectly referenced CDM files. **Not required if the config.json is in the model root folder.**| \<container\>\<folderPath\>|
 |useCdmStandardModelRoot | Indicates the model root is located at [https://cdm-schema.microsoft.com/CDM/logical/](https://github.com/microsoft/CDM/tree/master/schemaDocuments) <br/>Used to reference entity types defined in the CDM Content Delivery Network (CDN).<br/>***Overrides:*** entityDefinitionStorage, entityDefinitionModelRoot if specified.<br/>[See _Troubleshooting and Known Issues_ for an issue impacting access to the CDM CDN from Azure Databricks]| "useCdmStandardModelRoot" |
-|cdmSource|Defines how the 'cdm' alias if present in CDM definition files is resolved. If this option is used, it overrides any _cdm_ adapter specified in the config.json file.  Values are "builtin" or "referenced".  <br/> If set to _referenced_, then the latest published standard CDM definitions at https://cdm-schema.microsoft.com/logical/ are used.  If set to _builtin_ then the CDM base definitions built-in to the CDM object model used by the Spark CDM Connector will be used. <br/> Note: <br/> 1). The Spark CDM Connector may not be using the latest CDM SDK so may not contain the latest published standard definitions. <br/> 2). The built-in definitions only include the top-level CDM content such as foundations.cdm.json, primitives.cdm.json, etc.  If you wish to use lower-level standard CDM definitions, either use _referenced_ or include a cdm adapter in the config.json.<br/>[See _Troubleshooting and Known Issues_ for an issue impacting resolution of the cdm source from Azure Databricks]| "builtin"\|"referenced". |     
+|cdmSource|Defines how the 'cdm' alias if present in CDM definition files is resolved. If this option is used, it overrides any _cdm_ adapter specified in the config.json file.  Values are "builtin" or "referenced".  Default value is "referenced"  <br/> If set to _referenced_, then the latest published standard CDM definitions at https://cdm-schema.microsoft.com/logical/ are used.  If set to _builtin_ then the CDM base definitions built-in to the CDM object model used by the Spark CDM Connector will be used. <br/> Note: <br/> 1). The Spark CDM Connector may not be using the latest CDM SDK so may not contain the latest published standard definitions. <br/> 2). The built-in definitions only include the top-level CDM content such as foundations.cdm.json, primitives.cdm.json, etc.  If you wish to use lower-level standard CDM definitions, either use _referenced_ or include a cdm adapter in the config.json.<br/>[See _Troubleshooting and Known Issues_ for an issue impacting resolution of the cdm source from Azure Databricks]| "builtin"\|"referenced". |     
 
 In the example above, the full path to the customer entity definition object is ```
 https://myAccount.dfs.core.windows.net/models/crm/core/sales/customer.cdm.json/customer```, where ‘models’ is the container in ADLS.
@@ -296,6 +296,23 @@ mMembership")
 ```
 
 ### Other Considerations
+
+#### Spark to CDM datatype mapping
+The following datatype mappings are applied when converting CDM to/from Spark.
+
+|**Spark**  |**CDM**|
+|---------|---------|
+|ByteType|Byte|
+|ShortType|SmallInteger|
+|IntegerType|Integer|
+|LongType |BigInteger|
+|DateType |Date|
+|StringType|String|
+|DoubleType|Double|
+|DecimalType(x,y)|Decimal (x,y), default scale and precision is (18,4)|
+|BooleanType|Boolean|
+|Timestamp|DateTime (optionally Time, see below)|
+|FloatType|Float|
 
 #### Handling CDM Date, DateTime, and DateTimeOffset data
 
