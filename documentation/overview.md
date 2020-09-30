@@ -154,7 +154,7 @@ With both Synapse and Azure Databricks, you must ensure the identity used is gra
 
 As an alternative to using a managed identity or a user identity, explicit credentials can be provided to enable the Spark CDM connector to access data. In Azure Active Directory, [create an App Registration](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) and then grant this App Registration access to the storage account using either of the following roles: **Storage Blob Data Contributor** to allow the library to write to CDM folders, or **Storage Blob Data Reader** to allow only read. 
 
-Once permissions are created, you can pass the app id, app key, and tenant id to the connector using the options below. It is recommended to use Azure Key Vault to secure these values to ensure they are not stored in clear text in your notebook file. In Azure Databricks, [create a secret scope which can be backed by Azure Key Vault](https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes#create-an-azurekey-vault-backed-secret-scope).
+Once permissions are created, you can pass the app id, app key, and tenant id to the connector on each call to it using the options below. It is recommended to use Azure Key Vault to secure these values to ensure they are not stored in clear text in your notebook file. In Azure Databricks, [create a secret scope which can be backed by Azure Key Vault](https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes#create-an-azurekey-vault-backed-secret-scope).
 
 | **Option**   |**Description**  |**Pattern and example usage**  |
 |----------|---------|:---------:|
