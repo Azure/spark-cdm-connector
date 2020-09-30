@@ -314,7 +314,7 @@ The following datatype mappings are applied when converting CDM to/from Spark.
 |BooleanType|Boolean|
 |ByteType|Byte|
 
-Note that the CDM Binary datatype is not suported.
+Note that the CDM Binary datatype is not supported.
 
 #### Handling CDM Date, DateTime, and DateTimeOffset data
 
