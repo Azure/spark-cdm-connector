@@ -1,7 +1,7 @@
 # Using the Spark CDM Connector
 
 ***Limited preview release*** <br/>
-Guide last updated, Sept 12, 2020
+Guide last updated, Sept 29, 2020
 
 **NOTE:  This latest release of the doc applies to the 0.17 version of the Spark CDM Connector.**  
 
@@ -302,17 +302,19 @@ The following datatype mappings are applied when converting CDM to/from Spark.
 
 |**Spark**  |**CDM**|
 |---------|---------|
-|ByteType|Byte|
 |ShortType|SmallInteger|
 |IntegerType|Integer|
 |LongType |BigInteger|
 |DateType |Date|
+|Timestamp|DateTime (optionally Time, see below)|
 |StringType|String|
 |DoubleType|Double|
-|DecimalType(x,y)|Decimal (x,y), default scale and precision is (18,4)|
-|BooleanType|Boolean|
-|Timestamp|DateTime (optionally Time, see below)|
+|DecimalType(x,y)|Decimal (x,y) (default scale and precision is 18,4)|
 |FloatType|Float|
+|BooleanType|Boolean|
+|ByteType|Byte|
+
+Note that the CDM Binary datatype is not suported.
 
 #### Handling CDM Date, DateTime, and DateTimeOffset data
 
@@ -455,3 +457,4 @@ See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample 
 |8/14/20|_Updates for v0.17_<br/> entityDefinitionStorage option is now supported;<br/>Added Known Issue preventing resolution of the CDM CDN in Azure Databricks.|
 |9/10/20|Noted that the submanifest containing the source entity must be explicitly specified on read if the entity is in a second or lower level manifest or if the source entity exists in multiple submanifests|
 |9/12/20|Noted that that Spark 3.0 is not yet supported.|
+|9/29/20|Noted default for cdmSource option is referenced,<br/> Listed Spark to CDM datatype mappings|
