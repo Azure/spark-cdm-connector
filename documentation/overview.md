@@ -28,7 +28,9 @@ com.microsoft.cdm.BuildInfo.version
 [https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector](https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector)\
 [https://github.com/Azure/spark-cdm-connector](https://github.com/Azure/spark-cdm-connector)
 
-**NOTE: The Spark CDM Connector does not yet support Spark 3.0. **
+> Note:
+> * The Spark CDM Connector does not yet support Spark 3.0. </br>
+> * Azure Databricks mount points are not supported**
 
 
 **Samples:** Once installed, sample code and CDM models are available in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
