@@ -217,7 +217,7 @@ Folder organization and file format can be changed with the following options.
 |useSubManifest|If true, causes the target entity to be included in the root manifest via a sub-manifest. The sub-manifest and the entity definition are written into an entity folder beneath the root. Default is false.|"true"\|"false" |
 |format|Defines the file format. Current supported file formats are CSV and parquet. Default is "csv"|"csv"\|"parquet" <br/> |
 |delimiter|CSV only.  Defines the delimiter used.  Default is comma.   | "\|") |
-|columnHeaders| CSV only.  If true, will add a first row to data files with column headers. Default is "false"|"true"\|"false""| 
+|columnHeaders| CSV only.  If true, will add a first row to data files with column headers. Default is "true"|"true"\|"false""| 
 |compression|Write only. Parquet only. Defines the compression format used. Default is "snappy". <br/> See note below on using lzo with Azure Databricks|"uncompressed" \| "snappy" \| "gzip" \| "lzo". 
 |dataFolderFormat|Allows user-definable data folder structure within an entity folder.  Allows the use of date and time values to be substituted into folder names using DateTimeFormatter formatting. Non-formatter content must be enclosed in single quotes. Default format is ```"yyyy'-'MM'-'dd" ``` producing folder names like 2020-07-30| ```"'year'yyyy'/month'MM"``` <br/> ```"'Data'"```|
 
