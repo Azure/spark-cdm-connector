@@ -173,8 +173,8 @@ customerdf.write.format("com.microsoft.cdm")
   .option("manifestPath", outputContainer + "/customer/default.manifest.cdm.json")
   .option("entity", "TestEntity")
   .option("entityDefinitionPath", "Customer.cdm.json/Customer")  // Customer.cdm.json has an alias - "core"
-  .option("entityDefinitionModelRoot", "Models")   // fetches config.json from this location and finds definition of "core" alias, if configPath option is not present
-  .option("configPath", "/config")  // Add your config.json to override the above definition
+  .option("entityDefinitionModelRoot", container+ "Models")   // fetches config.json from this location and finds definition of "core" alias, if configPath option is not present
+  .option("configPath", "/config")  // Add your config.json to override the above definition. config is the name of container. This will find config.json in container - "config"
   .option("entityDefinitionStorage", "<storage1>.dfs.core.windows.net") // entityDefinitionModelRoot contains in this storage account
   .option("format", "parquet")
   .save()
@@ -254,5 +254,4 @@ val readExplicit = spark.read.format("com.microsoft.cdm")
 
 readImplicit.show(false)
 readExplicit.show(false)
-
 
