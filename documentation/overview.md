@@ -181,7 +181,7 @@ The following options identify the entity in the CDM folder that is either being
 |storage|The endpoint URL for the ADLS gen2 storage account *with HNS enabled* in which the CDM folder is located.  <br/>Use the **dfs**.core.windows.net URL | \<accountName\>.dfs.core.windows.net "myAccount.dfs.core.windows.net"|
 |manifestPath|The relative path to the manifest or model.json file in the storage account. For read, can be a root manifest or a sub-manifest or a model.json. For write, must be a root manifest.|\<container\>/{\<folderPath\>/}\<manifestFileName>, <br/>"mycontainer/default.manifest.cdm.json" "models/hr/employees.manifest.cdm.json" <br/> "models/hr/employees/model.json" (read only)         |
 |entity| The name of the source or target entity in the manifest. When writing an entity for the first time in a folder, the resolved entity definition will be given this name.  Entity name is case sensitive.| \<entityName\> <br/>"customer"|
-|maxCDMThreads| The maximum number of concurrent reads while resolving an entity definition. | Ay valid integer. Eg - 5|
+|maxCDMThreads| The maximum number of concurrent reads while resolving an entity definition. | Any valid integer. Eg - 5|
 
 
 
@@ -481,3 +481,4 @@ See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample 
 |9/12/20|Noted that that Spark 3.0 is not yet supported.|
 |9/29/20|Noted default for cdmSource option is referenced,<br/> Listed Spark to CDM datatype mappings|
 |10/27/20|Updated the guide to reflect that release 18.1 is the public preview release; noted that the connector uses the Spark FAILFAST option on read.|
+|12/9/20|Updated the guide to reflect new option - `maxCDMThreads`|
