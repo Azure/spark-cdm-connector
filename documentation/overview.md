@@ -3,7 +3,7 @@
 
 Guide last updated, Oct 27, 2020
 
-**NOTE:  This latest version of the doc applies to the 0.18.1 Public Preview release of the Spark CDM Connector.**  
+**NOTE:  This latest version of the doc applies to the 0.19.0 Public Preview release of the Spark CDM Connector.**  
 
 **NOTE: From the 0.16 version onward, several of the connector options were simplified.  Code written with earlier versions of the connector may need to be modified to use these revised options.**
 
@@ -79,7 +79,13 @@ The connector looks in the specified manifest and any first-level sub-manifests 
 
 Entity partitions can be in a mix of formats, for example, a mix of CSV and parquet files. All the entity data files identified in the manifest are combined into one dataset regardless of format and loaded to the dataframe.
 
-When reading CSV data, the connector uses the Spark FAILFAST [option](https://nam06.safelinks.protection.outlook.com/?url=https%3A%2F%2Fspark.apache.org%2Fdocs%2Flatest%2Fapi%2Fjava%2Forg%2Fapache%2Fspark%2Fsql%2FDataFrameReader.html%23csv-scala.collection.Seq-&data=04%7C01%7CBill.Gibson%40microsoft.com%7Ce799a08c91374ae2ae5108d87a1afd54%7C72f988bf86f141af91ab2d7cd011db47%7C1%7C0%7C637393603640786659%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C1000&sdata=GXQv1dqgKjFX6d%2FqpWcR%2FkhXdd53EEPz9ccAikYtEyI%3D&reserved=0).  It will throw an exception if the number of columns != the number of attributes in the entity.
+When reading CSV data, the connector uses the Spark FAILFAST option by default [option](https://nam06.safelinks.protection.outlook.com/?url=https%3A%2F%2Fspark.apache.org%2Fdocs%2Flatest%2Fapi%2Fjava%2Forg%2Fapache%2Fspark%2Fsql%2FDataFrameReader.html%23csv-scala.collection.Seq-&data=04%7C01%7CBill.Gibson%40microsoft.com%7Ce799a08c91374ae2ae5108d87a1afd54%7C72f988bf86f141af91ab2d7cd011db47%7C1%7C0%7C637393603640786659%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C1000&sdata=GXQv1dqgKjFX6d%2FqpWcR%2FkhXdd53EEPz9ccAikYtEyI%3D&reserved=0).  It will throw an exception if the number of columns != the number of attributes in the entity. Alternativelly, as of 0.19, permissive mode is now supported by the Spark-CDM-Connector. This mode is only supported for CSV files. With the permissive mode, when a CSV row has fewer number of columns than than the entity schema, null values will be assigned for the missing columns. When a CSV row has more columns than the entity schema, the columns greater than the entity schema column count will be truncated to the schema column count. Usage is as follows:
+```scala
+  .option("entity", "permissive") or .option("mode", "failfast")
+
+```
+
+
 
 ### Writing Data
 
@@ -482,3 +488,4 @@ See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample 
 |9/29/20|Noted default for cdmSource option is referenced,<br/> Listed Spark to CDM datatype mappings|
 |10/27/20|Updated the guide to reflect that release 18.1 is the public preview release; noted that the connector uses the Spark FAILFAST option on read.|
 |12/9/20|Updated the guide to reflect new option - `maxCDMThreads`|
+|2/10/21|Updated the guid to reflect the new mode option for `permissive|failfast`
