@@ -1,22 +1,17 @@
 # Using the Spark CDM Connector
 
-
-Guide last updated, Oct 27, 2020
-
-**NOTE:  This latest version of the doc applies to the 0.19.0 Public Preview release of the Spark CDM Connector.**  
-
-**NOTE: From the 0.16 version onward, several of the connector options were simplified.  Code written with earlier versions of the connector may need to be modified to use these revised options.**
-
 ## Overview
 
-The Spark CDM Connector enables a Spark program to read and write CDM entities in a CDM folder via Spark dataframes. This preview release is only tested with and supported with Apache Spark in Azure Synapse and Azure Databricks. 
+The Spark CDM Connector enables a Spark program to read and write CDM entities in a CDM folder via Spark dataframes.
 
-For information on defining CDM documents using CDM 1.0 see
+For information on defining CDM documents, see:
 [https://docs.microsoft.com/en-us/common-data-model/](https://docs.microsoft.com/en-us/common-data-model/).
 
-## Installing the Spark CDM connector
+The connector is currently usign CDM OM version 1.1.0
 
-**Apache Spark for Azure Synapse:** the Spark CDM Connector is pre-installed and requires no additional installation.
+## Using the Spark CDM connector
+
+The Spark CDM Connector is pre-installed on Azure Synapse and requires no additional installation.
 
 Note that there may be a delay before the latest version of the connector is available in Synapse. Use the API below to retrieve the current version of the Spark CDM Connector and compare with the [release notes](https://github.com/Azure/spark-cdm-connector/releases) in GitHub.
 
@@ -24,16 +19,7 @@ Note that there may be a delay before the latest version of the connector is ava
 com.microsoft.cdm.BuildInfo.version
 ```
 
-**Azure Databricks:** the Spark CDM connector is provided as a jar file in GitHub and Maven that must be installed in an Azure Databricks cluster. 
-[https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector](https://mvnrepository.com/artifact/com.microsoft.azure/spark-cdm-connector)\
-[https://github.com/Azure/spark-cdm-connector](https://github.com/Azure/spark-cdm-connector)
-
-> Note:</br>
-> The Spark CDM Connector does not yet support Spark 3.0. </br>
-> Azure Databricks mount points are not supported.
-
-
-**Samples:** Once installed, sample code and CDM models are available in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
+**Samples:** Sample code and CDM models are available in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
 
 ## Scenarios
 ### Supported scenarios
@@ -53,8 +39,9 @@ The following capabilities or limitations apply:
 - Supports data in Apache Parquet format, including nested parquet.
 - Supports sub-manifests on read, optional use of entity-scoped submanifests on write.
 - Supports writing data using user modifiable partition patterns.
-- Supports use of managed identity (Synapse), user identity (Azure Databricks) and credentials.
+- Supports use of managed identity, app credentials, and SAS Token for authentication.
 - Supports resolving CDM aliases locations used in imports using CDM adapter definitions described in a config.json
+- Spark Version: Both Spark 2 and Spark 3 are supported
 
 See also _Known issues_ section at the end of this document.
 
@@ -79,7 +66,7 @@ The connector looks in the specified manifest and any first-level sub-manifests 
 
 Entity partitions can be in a mix of formats, for example, a mix of CSV and parquet files. All the entity data files identified in the manifest are combined into one dataset regardless of format and loaded to the dataframe.
 
-When reading CSV data, the connector uses the Spark FAILFAST option by default [option](https://nam06.safelinks.protection.outlook.com/?url=https%3A%2F%2Fspark.apache.org%2Fdocs%2Flatest%2Fapi%2Fjava%2Forg%2Fapache%2Fspark%2Fsql%2FDataFrameReader.html%23csv-scala.collection.Seq-&data=04%7C01%7CBill.Gibson%40microsoft.com%7Ce799a08c91374ae2ae5108d87a1afd54%7C72f988bf86f141af91ab2d7cd011db47%7C1%7C0%7C637393603640786659%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C1000&sdata=GXQv1dqgKjFX6d%2FqpWcR%2FkhXdd53EEPz9ccAikYtEyI%3D&reserved=0).  It will throw an exception if the number of columns != the number of attributes in the entity. Alternativelly, as of 0.19, permissive mode is now supported by the Spark-CDM-Connector. This mode is only supported for CSV files. With the permissive mode, when a CSV row has fewer number of columns than than the entity schema, null values will be assigned for the missing columns. When a CSV row has more columns than the entity schema, the columns greater than the entity schema column count will be truncated to the schema column count. Usage is as follows:
+When reading CSV data, the connector uses the Spark FAILFAST option by default [option](https://spark.apache.org/docs/latest/sql-data-sources-csv.html#data-source-option. It will throw an exception if the number of columns != the number of attributes in the entity. Alternativelly, as of 0.19, permissive mode is now supported by the Spark-CDM-Connector. This mode is only supported for CSV files. With the permissive mode, when a CSV row has fewer number of columns than than the entity schema, null values will be assigned for the missing columns. When a CSV row has more columns than the entity schema, the columns greater than the entity schema column count will be truncated to the schema column count. Usage is as follows:
 ```scala
   .option("entity", "permissive") or .option("mode", "failfast")
 
@@ -136,7 +123,7 @@ The Spark CDM Connector will look in the entity definition model root location f
 
 By being able to override the config.json, you can provide runtime-accessible locations for CDM definitions.  You must be sure, however, that the content referenced at runtime is consistent with the definitions used when the CDM was originally authored.
 
-By convention, the _cdm_ alias is used to refer to the location of the root-level standard CDM  definitions, including the foundations.cdm.json file, which includes the CDM primitive datatypes and a core set of trait definitions required for most CDM entity definitions.  The _cdm_ alias can be resolved like any other alias using an adapter entry in the config.json file.  Alternatively, if an adapter is not specified or a null entry is provided, then the cdm alias will be resolved by default to the CDM public CDN at https://cdm-schema.microsoft.com/logical/.  You can also use the _cdmSource_ option to override how the cdm alias is resolved (see the option details below). Using the _cdmsource_ option is useful if the _cdm_ alias is the only alias used in the CDM definitions being resolved as it can avoid needing to create or reference a config.json file. [See _Troubleshooting and Known Issues_ for an issue impacting resolution of the _cdm_ alias from Azure Databricks]
+By convention, the _cdm_ alias is used to refer to the location of the root-level standard CDM  definitions, including the foundations.cdm.json file, which includes the CDM primitive datatypes and a core set of trait definitions required for most CDM entity definitions.  The _cdm_ alias can be resolved like any other alias using an adapter entry in the config.json file.  Alternatively, if an adapter is not specified or a null entry is provided, then the cdm alias will be resolved by default to the CDM public CDN at https://cdm-schema.microsoft.com/logical/.  You can also use the _cdmSource_ option to override how the cdm alias is resolved (see the option details below). Using the _cdmsource_ option is useful if the _cdm_ alias is the only alias used in the CDM definitions being resolved as it can avoid needing to create or reference a config.json file. 
 
 ### Parameters, options and save mode
 
@@ -161,15 +148,20 @@ val readDf = spark.read.format("com.microsoft.cdm")
 
 In Synapse, the Spark CDM Connector supports use of [Managed identities for Azure resource](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) to mediate access to the Azure datalake storage account containing the CDM folder.  A managed identity is [automatically created for every Synapse workspace](https://docs.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-identity).  The connector uses the managed identity of the workspace that contains the notebook in which the connector is called to authenticate to the storage accounts being addressed.
 
-In Azure Databricks, you can enable [Azure Active Directory credential passthrough](https://docs.microsoft.com/en-us/azure/databricks/security/credential-passthrough/adls-passthrough).  With this enabled, the Spark CDM Connector connector will authenticate using the same Azure Active Directory identity that was used to log into Azure Databricks.  Enabling this is done on the cluster and requires an Azure Databricks Premium plan. 
+You must ensure the identity used is granted access to the appropriate storage accounts.  Grant  **Storage Blob Data Contributor** to allow the library to write to CDM folders, or **Storage Blob Data Reader** to allow only read access. In both cases, no additional connector options are required. 
 
-With both Synapse and Azure Databricks, you must ensure the identity used is granted access to the appropriate storage accounts.  Grant  **Storage Blob Data Contributor** to allow the library to write to CDM folders, or **Storage Blob Data Reader** to allow only read access. In both cases, no additional connector options are required. 
+#### SAS Token access control options ####
+SaS Token Credential authentication to storage accounts is an additional option for authentication to storage. With SAS token authentication, the SaS token can be at the container or folder level. The appropriate permissions (read/write) are required – read manifest/partition only needs read level support, while write requires read and write support.
+
+| **Option**   |**Description**  |**Pattern and example usage**  |
+|----------|---------|:---------:|
+| sasToken |The sastoken to access the relative storageAccount with the correct permissions |	\<token\>|
 
 #### Credential-based access control options
 
 As an alternative to using a managed identity or a user identity, explicit credentials can be provided to enable the Spark CDM connector to access data. In Azure Active Directory, [create an App Registration](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) and then grant this App Registration access to the storage account using either of the following roles: **Storage Blob Data Contributor** to allow the library to write to CDM folders, or **Storage Blob Data Reader** to allow only read.
 
-Once permissions are created, you can pass the app id, app key, and tenant id to the connector on each call to it using the options below. It is recommended to use Azure Key Vault to secure these values to ensure they are not stored in clear text in your notebook file. In Azure Databricks, [create a secret scope which can be backed by Azure Key Vault](https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes#create-an-azurekey-vault-backed-secret-scope).
+Once permissions are created, you can pass the app id, app key, and tenant id to the connector on each call to it using the options below. It is recommended to use Azure Key Vault to secure these values to ensure they are not stored in clear text in your notebook file. 
 
 | **Option**   |**Description**  |**Pattern and example usage**  |
 |----------|---------|:---------:|
@@ -203,8 +195,8 @@ The following options identify the logical entity definition that defines the en
 |entityDefinitionModelRoot|The location of the model root or corpus within the account. |\<container\>/\<folderPath\> <br/> "crm/core"<br/>|
 |entityDefinitionPath|Location of the entity. File path to the CDM definition file relative to the model root, including the name of the entity in that file.|\<folderPath\>/\<entityName\>.cdm.json/\<entityName\><br/>"sales/customer.cdm.json/customer"|
 configPath| The container and folder path to a config.json file that contains the adapter configurations for all aliases included in the entity definition file and any directly or indirectly referenced CDM files. **Not required if the config.json is in the model root folder.**| \<container\>\<folderPath\>|
-|useCdmStandardModelRoot | Indicates the model root is located at [https://cdm-schema.microsoft.com/CDM/logical/](https://github.com/microsoft/CDM/tree/master/schemaDocuments) <br/>Used to reference entity types defined in the CDM Content Delivery Network (CDN).<br/>***Overrides:*** entityDefinitionStorage, entityDefinitionModelRoot if specified.<br/>[See _Troubleshooting and Known Issues_ for an issue impacting access to the CDM CDN from Azure Databricks]| "useCdmStandardModelRoot" |
-|cdmSource|Defines how the 'cdm' alias if present in CDM definition files is resolved. If this option is used, it overrides any _cdm_ adapter specified in the config.json file.  Values are "builtin" or "referenced".  Default value is "referenced"  <br/> If set to _referenced_, then the latest published standard CDM definitions at https://cdm-schema.microsoft.com/logical/ are used.  If set to _builtin_ then the CDM base definitions built-in to the CDM object model used by the Spark CDM Connector will be used. <br/> Note: <br/> 1). The Spark CDM Connector may not be using the latest CDM SDK so may not contain the latest published standard definitions. <br/> 2). The built-in definitions only include the top-level CDM content such as foundations.cdm.json, primitives.cdm.json, etc.  If you wish to use lower-level standard CDM definitions, either use _referenced_ or include a cdm adapter in the config.json.<br/>[See _Troubleshooting and Known Issues_ for an issue impacting resolution of the cdm source from Azure Databricks]| "builtin"\|"referenced". |     
+|useCdmStandardModelRoot | Indicates the model root is located at [https://cdm-schema.microsoft.com/CDM/logical/](https://github.com/microsoft/CDM/tree/master/schemaDocuments) <br/>Used to reference entity types defined in the CDM Content Delivery Network (CDN).<br/>***Overrides:*** entityDefinitionStorage, entityDefinitionModelRoot if specified.<br/>| "useCdmStandardModelRoot" |
+|cdmSource|Defines how the 'cdm' alias if present in CDM definition files is resolved. If this option is used, it overrides any _cdm_ adapter specified in the config.json file.  Values are "builtin" or "referenced".  Default value is "referenced"  <br/> If set to _referenced_, then the latest published standard CDM definitions at https://cdm-schema.microsoft.com/logical/ are used.  If set to _builtin_ then the CDM base definitions built-in to the CDM object model used by the Spark CDM Connector will be used. <br/> Note: <br/> 1). The Spark CDM Connector may not be using the latest CDM SDK so may not contain the latest published standard definitions. <br/> 2). The built-in definitions only include the top-level CDM content such as foundations.cdm.json, primitives.cdm.json, etc.  If you wish to use lower-level standard CDM definitions, either use _referenced_ or include a cdm adapter in the config.json.<br/>| "builtin"\|"referenced". |     
 
 In the example above, the full path to the customer entity definition object is ```
 https://myAccount.dfs.core.windows.net/models/crm/core/sales/customer.cdm.json/customer```, where ‘models’ is the container in ADLS.
@@ -227,11 +219,8 @@ Folder organization and file format can be changed with the following options.
 |format|Defines the file format. Current supported file formats are CSV and parquet. Default is "csv"|"csv"\|"parquet" <br/> |
 |delimiter|CSV only.  Defines the delimiter used.  Default is comma.   | "\|") |
 |columnHeaders| CSV only.  If true, will add a first row to data files with column headers. Default is "true"|"true"\|"false""| 
-|compression|Write only. Parquet only. Defines the compression format used. Default is "snappy". <br/> See note below on using lzo with Azure Databricks|"uncompressed" \| "snappy" \| "gzip" \| "lzo". 
+|compression|Write only. Parquet only. Defines the compression format used. Default is "snappy" \|"uncompressed" \| "snappy" \| "gzip" \| "lzo". 
 |dataFolderFormat|Allows user-definable data folder structure within an entity folder.  Allows the use of date and time values to be substituted into folder names using DateTimeFormatter formatting. Non-formatter content must be enclosed in single quotes. Default format is ```"yyyy'-'MM'-'dd" ``` producing folder names like 2020-07-30| ```"'year'yyyy'/month'MM"``` <br/> ```"'Data'"```|
-
-Note that the lzo codec is not available by default in Azure Databricks but must be installed. See
-[https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/read-lzo](https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/read-lzo)
 
 #### Save Mode
 
@@ -452,40 +441,15 @@ val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
 
 ## Troubleshooting and Known issues
 
-- When using parquet in Azure Databricks, lzo compression is not currently supported.
 - Ensure the decimal precision and scale of decimal data type fields used in the dataframe match the data type used in the CDM entity definition - requires precision and scale traits are defined on the data type.  If the precision and scale are not defined explicitly in CDM, the default used is Decimal(18,4).  For model.json files, Decimal is assumed to be Decimal(18,4).
 - Folder and file names in the options below should not include spaces or special characters, such as "=": manifestPath, entityDefinitionModelRoot, entityDefinitionPath, dataFolderFormat.
-- When using the Spark CDM Connector in Azure Databricks, there is a problem that prevents access to the CDM CDN.  To work around this, the connector uses the CDM GitHub location https://github.com/microsoft/CDM/tree/master/schemaDocuments in its place.  Once this issue is resolved in a future version, all CDM references will resolve to the CDN location.  This problem does not impact applications running in Synapse, which use the CDM CDN adapter as described. The following are impacted: 
-  - _useCdmStandardModelRoot_ option
-  - _cdm_ alias resolution
-  - _cdmSource_ option
 
 ## Not yet supported
 
 The following features are not yet supported:
 - Overriding a timestamp column to be interpreted as a CDM Time rather than a DateTime is initially supported for CSV files only.  Support for writing Time data to Parquet will be added in a later release.
 - Parquet Maptype and arrays of primitive types and arrays of array types are not currently supported by CDM so are not supported by the Spark CDM Connector.
-- Spark 3.0.
 
 ## Samples
 
 See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample code and CDM files.
-
-## Changes to this doc
-
-|**Date**  |**Change**|
-|------ |---------|
-|5/4/20 | Clarified that Overwrite and Append save modes do not allow schema change <br/> Clarified in capabilities summary that partition patterns are supported on read but not write|
-|5/6/20 | Clarified that on read, entity files of different format are combined into one dataframe|
-|5/11/20|Removed known problem regarding number of rows < executors; fixed in v0.8.|
-|5/15/20|Clarified that aliases are not yet supported <br/> Clarified that schema drift and schema evolution are not supported|
-6/1/20| Noted that an additional option is required when writing Parquet from Synapse in _Known issues_<br/>Added reference to using API to get the current library version|
-|6/23/20| Noted that folder and file names must be URL encoded, <br/> Decimal precision and scale must match CDM datatypes used.|
-|7/31/20| _Updates for v0.16_<br/>Managed identities and user identities are supported for access control, the use of credential options is now optional; <br/>Support for CSV column headers and customizing the delimiter;<br/>Removed the required to provide a reference to a logical entity definition when reading an entity; <br/> CDM files that use aliases in import statements are now resolved using adapter definitions from a config.json file; <br/> Standard base CDM datatype and trait definitions (foundations.cdm.json) can now be resolved from the built-in set in the CDM object model or from the CDM public CDN location using a new cdmSource option - this replaces the useCdmGithub option;<br/> Nested parquet is supported based on structured resolution guidance in CDM;<br/> The overwrite save mode now overwrites the schema if it is changed rather than reporting an error;<br/>On write, data files are recorded in the manifest using a partition pattern entry rather than individual partition entries; <br/> On write, the data folder structue and names are user definable;<br/>Spaces are now handled in file and folder names without requiring URL-encoding;<br/> There is no longer a requirement to specify the .option("databricks", false) when writing Parquet from Synapse.|
-|8/14/20|_Updates for v0.17_<br/> entityDefinitionStorage option is now supported;<br/>Added Known Issue preventing resolution of the CDM CDN in Azure Databricks.|
-|9/10/20|Noted that the submanifest containing the source entity must be explicitly specified on read if the entity is in a second or lower level manifest or if the source entity exists in multiple submanifests|
-|9/12/20|Noted that that Spark 3.0 is not yet supported.|
-|9/29/20|Noted default for cdmSource option is referenced,<br/> Listed Spark to CDM datatype mappings|
-|10/27/20|Updated the guide to reflect that release 18.1 is the public preview release; noted that the connector uses the Spark FAILFAST option on read.|
-|12/9/20|Updated the guide to reflect new option - `maxCDMThreads`|
-|2/10/21|Updated the guid to reflect the new mode option for `permissive|failfast`
