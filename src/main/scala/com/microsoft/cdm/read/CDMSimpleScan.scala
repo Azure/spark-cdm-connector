@@ -1,7 +1,7 @@
 package com.microsoft.cdm.read
 
 import com.microsoft.cdm.log.SparkCDMLogger
-import com.microsoft.cdm.utils.{AuthCredential, CDMModelReader, CDMSource, CDMTokenProvider, Constants, DataConverter, Messages, SerializedABFSHadoopConf, SparkSerializableConfiguration}
+import com.microsoft.cdm.utils.{Auth, CDMModelReader, CDMSource, CDMTokenProvider, CdmAuthType, Constants, DataConverter, Messages, SerializedABFSHadoopConf, SparkSerializableConfiguration}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory, Scan}
 import org.apache.spark.sql.types.StructType
@@ -20,7 +20,7 @@ class CDMSimpleScan(val storage: String,
                     val manifestFileName: String,
                     val entityName: String,
                     val entDefContAndPath: String,
-                    val authCredential: AuthCredential,
+                    val auth: Auth,
                     val conf:Configuration,
                     val dataConverter: DataConverter,
                     val cdmSource: CDMSource.Value,
@@ -30,11 +30,11 @@ class CDMSimpleScan(val storage: String,
 
   val logger  = LoggerFactory.getLogger(classOf[CDMSimpleScan])
 
- val serializedHadoopOConf= SerializedABFSHadoopConf.getConfiguration(storage, container, authCredential, conf)
+  val serializedHadoopOConf= SerializedABFSHadoopConf.getConfiguration(storage, container, auth, conf)
 
-  val tokenProvider =  if (authCredential.appId.isEmpty) Some(new CDMTokenProvider(serializedHadoopOConf, storage)) else None
+  val tokenProvider =  if (auth.getAuthType == CdmAuthType.Token.toString()) Some(new CDMTokenProvider(serializedHadoopOConf, storage)) else None
 
-  val cdmModel = new CDMModelReader(storage, container, manifestPath, manifestFileName, entityName, entDefContAndPath, authCredential, tokenProvider, cdmSource, entityDefinitionStorage,
+  val cdmModel = new CDMModelReader(storage, container, manifestPath, manifestFileName, entityName, entDefContAndPath, auth, tokenProvider, cdmSource, entityDefinitionStorage,
     maxCDMThreads)
 
   //TODO: Make this a accessor class to retrieve tuple items
