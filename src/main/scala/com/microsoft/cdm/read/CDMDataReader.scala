@@ -20,7 +20,7 @@ import java.io.{File, FileOutputStream, InputStream}
 class CDMDataReader(val storage: String,
                     val container: String,
                     val fileReader: ReaderConnector,
-                    val header: Boolean,
+                    val hasHeader: Boolean,
                     var schema: StructType,
                     var dataConverter: DataConverter,
                     val mode: String) extends PartitionReader[InternalRow] with Serializable {
@@ -34,11 +34,11 @@ class CDMDataReader(val storage: String,
    * @return Boolean indicating whether there is any data left to read.
    */
   def next: Boolean = {
-    if (header && !headerRead) {
+    if (hasHeader && !headerRead) {
       fileReader.readRow
 
       //TODO: verify header names match with what we have in CDM
-      println("TODO: Verify header names match")
+      // println("TODO: Verify header names match")
       headerRead = true
     }
 
@@ -68,7 +68,7 @@ class CDMDataReader(val storage: String,
     if (row.length > schema.fields.length) {
       seq = schema.zipWithIndex.map{ case (col, index) =>
         val dataType = schema.fields(index).dataType
-        fileReader.jsonToData(dataType, row.apply(index), mode)
+        fileReader.jsonToData(dataType, row.apply(index), index, mode)
       }
     } else if (row.length < schema.fields.length) {
       // When there are fewer columns in the CSV file the # of attributes in cdm entity file at the end
@@ -77,13 +77,13 @@ class CDMDataReader(val storage: String,
           null
         } else {
           val dataType = schema.fields(index).dataType
-          fileReader.jsonToData(dataType, row.apply(index), mode)
+          fileReader.jsonToData(dataType, row.apply(index), index, mode)
         }
       }
     } else {
       seq = row.zipWithIndex.map { case (col, index) =>
         val dataType = schema.fields(index).dataType
-        fileReader.jsonToData(dataType, row.apply(index), mode)
+        fileReader.jsonToData(dataType, row.apply(index), index, mode)
       }
     }
 
