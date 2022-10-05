@@ -1,14 +1,14 @@
 package com.microsoft.cdm
 
-import com.microsoft.cdm.utils.{CDMEntity, CDMModelCommon, CDMOptions, CDMTokenProvider, EntityNotFoundException, ManifestNotFoundException, SerializedABFSHadoopConf, SparkSerializableConfiguration}
+import com.microsoft.cdm.utils.{CDMEntity, CDMModelCommon, CDMOptions, CDMTokenProvider, CdmAuthType, EntityNotFoundException, ManifestNotFoundException, SerializedABFSHadoopConf, SparkSerializableConfiguration}
 
 class HadoopTables() {
 
 
   def load(cdmOptions: CDMOptions): CDMEntity = {
-    val serializedHadoopConf  = SerializedABFSHadoopConf.getConfiguration(cdmOptions.storage, cdmOptions.container, cdmOptions.authCreds, cdmOptions.conf)
+    val serializedHadoopConf  = SerializedABFSHadoopConf.getConfiguration(cdmOptions.storage, cdmOptions.container, cdmOptions.auth, cdmOptions.conf)
 
-    val tokenProvider =  if (cdmOptions.authCreds.appId.isEmpty) Some(new CDMTokenProvider(serializedHadoopConf, cdmOptions.storage)) else None
+    val tokenProvider =  if (cdmOptions.auth.getAuthType == CdmAuthType.Token.toString()) Some(new CDMTokenProvider(serializedHadoopConf, cdmOptions.storage)) else None
 
     val cdmModel = new CDMModelCommon(cdmOptions.storage,
       cdmOptions.container,
@@ -17,7 +17,7 @@ class HadoopTables() {
       cdmOptions.entity,
       "",
       "",
-      cdmOptions.authCreds, tokenProvider,
+      cdmOptions.auth, tokenProvider,
       cdmOptions.overrideConfigPath,
       cdmOptions.cdmSource,
       "",
