@@ -14,6 +14,8 @@ class CDMOptions(options: CaseInsensitiveStringMap) {
   var appId: String = ""
   var appKey: String = ""
   var tenantId : String = ""
+  var sasToken: String = ""
+  var auth: Auth = null
 
   val storage = getRequiredArgument(options, "storage")
   val entity= getRequiredArgument(options,"entity")
@@ -40,17 +42,21 @@ class CDMOptions(options: CaseInsensitiveStringMap) {
 
   var conf : Configuration = SparkSession.builder.getOrCreate.sessionState.newHadoopConf()
   Environment.sparkPlatform = SparkPlatform.getPlatform(conf)
-  if (!useTokenAuth(options)) {
+  if (getAuthType(options) == CdmAuthType.AppReg.toString()) {
     appId = getRequiredArgument(options,"appId")
     appKey = getRequiredArgument(options,"appKey")
     tenantId = getRequiredArgument(options,"tenantId")
+    auth = AppRegAuth(appId, appKey, tenantId)
+  } else if (getAuthType(options) == CdmAuthType.Sas.toString()) {
+    sasToken = getRequiredArgument(options,"sasToken")
+    auth = SasAuth(sasToken)
+  } else if (getAuthType(options) == CdmAuthType.Token.toString()) {
+    auth = TokenAuth()
   } else {
-    if ( Environment.sparkPlatform == SparkPlatform.Other){
+    if (Environment.sparkPlatform == SparkPlatform.Other){
       throw new Exception(Messages.managedIdentitiesSynapseDataBricksOnly)
     }
   }
-
-  val authCreds = AuthCredential(appId, appKey, tenantId)
 
   def isNumeric(input: String): Boolean = input.forall(_.isDigit)
 
@@ -61,20 +67,24 @@ class CDMOptions(options: CaseInsensitiveStringMap) {
     result
   }
 
-  def useTokenAuth(options: CaseInsensitiveStringMap): Boolean = {
+  def getAuthType(options: CaseInsensitiveStringMap): String = {
     val appIdPresent =  options.containsKey("appId")
     val appKeyPresent =  options.containsKey("appKey")
     val tenantIdPresent =  options.containsKey("tenantId")
-    val result = if (appIdPresent || appKeyPresent || tenantIdPresent) {
+    val sasTokenPresent =  options.containsKey("sasToken")
+    val result = if (appIdPresent || appKeyPresent|| tenantIdPresent) {
       //make sure all creds are present
       if (!appIdPresent || !appKeyPresent || !tenantIdPresent) {
         throw new Exception("All creds must exist")
       }
-      SparkCDMLogger.log(Level.INFO,"Using App creds for authentication", logger)
-      false
+      SparkCDMLogger.log(Level.INFO,"Using app registration for authentication", logger)
+      CdmAuthType.AppReg.toString()
+    } else if (sasTokenPresent) {
+      SparkCDMLogger.log(Level.INFO,"Using SAS token for authentication", logger)
+      CdmAuthType.Sas.toString()
     } else {
       SparkCDMLogger.log(Level.INFO, "Using managed identities for authentication", logger)
-      true
+      CdmAuthType.Token.toString()
     }
     result
   }

@@ -3,7 +3,8 @@ package com.microsoft.cdm.write
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import com.microsoft.cdm.utils.{CDMDataFolder, CDMOptions, Constants, FileFormatSettings, Messages}
+import com.microsoft.cdm.utils.{CDMDataFolder, CDMOptions, CdmAuthType, Constants, FileFormatSettings, Messages}
+
 import sys.process._
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -36,7 +37,7 @@ class CDMWriteOptions(options: CaseInsensitiveStringMap) extends CDMOptions(opti
 
   if ((Environment.sparkPlatform eq SparkPlatform.DataBricks) && compressionFormat.equals("lzo")) checkLzo(compressionCodec)
 
-  if (!useTokenAuth(options)) {
+  if (getAuthType(options) != CdmAuthType.Token.toString()) {
     if(!entityDefinitionStorage.equals(storage)) {
       throw new IllegalArgumentException(Messages.entityDefStorageAppCredError)
     }
