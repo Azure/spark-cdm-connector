@@ -17,7 +17,7 @@ pomPostProcess := { (node: XmlNode) =>
   }).transform(node).head
 }
 
-version := "1.19.2"
+version := "1.19.3"
 
 crossPaths := false
 ThisBuild / scalaVersion := "2.12.13"
