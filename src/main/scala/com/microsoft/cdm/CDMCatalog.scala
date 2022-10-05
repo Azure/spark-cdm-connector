@@ -3,7 +3,7 @@ package com.microsoft.cdm
 import java.util
 
 import com.microsoft.cdm.log.SparkCDMLogger
-import com.microsoft.cdm.utils.{CDMOptions, EntityNotFoundException, ManifestNotFoundException}
+import com.microsoft.cdm.utils.{CDMOptions, CdmAuthType, EntityNotFoundException, ManifestNotFoundException}
 import org.apache.spark.sql.catalyst.analysis.{NoSuchTableException, TableAlreadyExistsException}
 import org.apache.spark.sql.connector.catalog.{CatalogPlugin, Identifier, NamespaceChange, SupportsNamespaces, Table, TableCatalog, TableChange}
 import org.apache.spark.sql.connector.expressions.Transform
@@ -74,20 +74,24 @@ class CDMCatalog extends CatalogPlugin with TableCatalog with SupportsNamespaces
     result
   }
 
-  def useTokenAuth(options: CaseInsensitiveStringMap): Boolean = {
+  def getAuthType(options: CaseInsensitiveStringMap): String = {
     val appIdPresent =  options.containsKey("appId")
     val appKeyPresent =  options.containsKey("appKey")
     val tenantIdPresent =  options.containsKey("tenantId")
-    val result = if (appIdPresent || appKeyPresent || tenantIdPresent) {
+    val sasTokenPresent =  options.containsKey("sasToken")
+    val result = if (appIdPresent || appKeyPresent|| tenantIdPresent) {
       //make sure all creds are present
       if (!appIdPresent || !appKeyPresent || !tenantIdPresent) {
         throw new Exception("All creds must exist")
       }
-      SparkCDMLogger.log(Level.INFO,"Using App creds for authentication", logger)
-      false
+      SparkCDMLogger.log(Level.INFO,"Using app registration for authentication", logger)
+      CdmAuthType.AppReg.toString()
+    } else if (sasTokenPresent) {
+      SparkCDMLogger.log(Level.INFO,"Using SAS token for authentication", logger)
+      CdmAuthType.Sas.toString()
     } else {
       SparkCDMLogger.log(Level.INFO, "Using managed identities for authentication", logger)
-      true
+      CdmAuthType.Token.toString()
     }
     result
   }
