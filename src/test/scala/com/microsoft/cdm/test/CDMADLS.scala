@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 
 import com.microsoft.cdm.utils.Constants.DECIMAL_PRECISION
 import org.apache.commons.io
-import com.microsoft.cdm.utils.{AuthCredential, CDMDataFolder, Constants, Messages, SerializedABFSHadoopConf}
+import com.microsoft.cdm.utils.{AppRegAuth, Auth, CDMDataFolder, Constants, Messages, SerializedABFSHadoopConf}
 import com.microsoft.commondatamodel.objectmodel.cdm.{CdmCorpusDefinition, CdmDataPartitionDefinition, CdmEntityDefinition, CdmManifestDeclarationDefinition, CdmManifestDefinition, CdmTraitReference, CdmTypeAttributeDefinition}
 import com.microsoft.commondatamodel.objectmodel.enums.CdmObjectType
 import com.microsoft.commondatamodel.objectmodel.storage.{AdlsAdapter, CdmStandardsAdapter}
@@ -28,6 +28,10 @@ class CDMADLS extends FunSuite {
   private val appkey = System.getenv("APPKEY")
   private val tenantid = System.getenv("TENANTID")
   private val storageAccountName = System.getenv(("ACCOUNT_URL"))
+  private val sastokenatroot = System.getenv("SASTOKENROOT")
+  private val sastokenatfolder = System.getenv("SASTOKENFOLDER")
+  private val sastokencustomerfolder = System.getenv("SASTOKENCUSTOMERFOLDER")
+  private val sastokentransactionfolder = System.getenv("SASTOKENTRANSACTIONFOLDER")
   private val storageAccountUrl = "https://" + storageAccountName;
   private val outputContainer = "output"
 
@@ -56,7 +60,7 @@ class CDMADLS extends FunSuite {
    * @param path - the path directory to delete (recursively)
    */
   private def cleanup(container: String, path: String ): Unit = {
-    val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + container, AuthCredential(appid, appkey, tenantid), conf)
+    val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + container, AppRegAuth(appid, appkey, tenantid), conf)
     val fs= serConf.getFileSystem()
     fs.delete(new Path(path), true)
   }
@@ -200,6 +204,74 @@ class CDMADLS extends FunSuite {
     }
   }
 
+  test("spark adls too many char per col with sasToken at root level") {
+    try {
+      val originalDF = spark.read.format("com.microsoft.cdm")
+        .option("storage",storageAccountName)
+        .option("manifestPath", "sateesh/toomanycharpercol/model.json")
+        .option("entity", "contact")
+        .option("sasToken", sastokenatroot)
+        .load()
+      originalDF.select("*").show()
+
+      originalDF.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/root/default.manifest.cdm.json")
+        .option("entity", "contact")
+        .option("sasToken", sastokenatroot)
+        .save()
+    } catch {
+      case e: Exception=> println("Exception: " + e.printStackTrace())
+        assert(false)
+    } finally {
+      cleanup(outputContainer, "/")
+    }
+  }
+
+  test("spark adls too many char per col with sasToken at folder level") {
+    try {
+      val originalDF = spark.read.format("com.microsoft.cdm")
+        .option("storage",storageAccountName)
+        .option("manifestPath", "dynamicscontainer/sastokenfolder/model.json")
+        .option("entity", "contact")
+        .option("sasToken", sastokenatfolder)
+        .load()
+      originalDF.select("*").show()
+
+      originalDF.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", "dynamicscontainer/sastokenfolder/write/default.manifest.cdm.json")
+        .option("entity", "contact")
+        .option("sasToken", sastokenatfolder)
+        .save()
+    } catch {
+      case e: Exception=> println("Exception: " + e.printStackTrace())
+        assert(false)
+    } finally {
+      cleanup("dynamicscontainer", "/sastokenfolder/write/")
+    }
+  }
+
+  test("spark adls with sas token join at folder level") {
+    try {
+      val originalDF = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", "sateesh/Customer/Main.manifest.cdm.json")
+        .option("entity", "CustTable")
+        .option("sasToken", sastokencustomerfolder)
+        .load()
+      val originalDF1 = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", "sateesh/Transaction/Transaction.manifest.cdm.json")
+        .option("entity", "CustTrans")
+        .option("sasToken", sastokentransactionfolder)
+        .load()
+      originalDF1.join(originalDF, Seq("ACCOUNTNUM")).limit(1).show()
+    } catch {
+      case e: Exception=> println("Exception: " + e.printStackTrace())
+        assert(false)
+    }
+  } 
 
   test("spark adls read rahul") {
     try {
@@ -416,7 +488,7 @@ class CDMADLS extends FunSuite {
 
       //verify we we were able to set the manifest name for a new manifest
       val manifestURI = storageAccountUrl + "/" + outputContainer + "/copy-wwi.manifest.cdm.json"
-      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AuthCredential(appid, appkey, tenantid), conf)
+      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AppRegAuth(appid, appkey, tenantid), conf)
       val fs= FileSystem.get(serConf.value)
       val path = new Path("/copy-wwi.manifest.cdm.json")
       var in = fs.open(path);
@@ -465,7 +537,7 @@ class CDMADLS extends FunSuite {
 
   test("Test Overwrite Partitions.partition patterns") {
     val df = testdata.prepareDataWithAllTypes()
-    val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AuthCredential(appid, appkey, tenantid), conf)
+    val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AppRegAuth(appid, appkey, tenantid), conf)
     val fs = serConf.getFileSystem()
 
     //write without partition patterns
@@ -1912,7 +1984,7 @@ class CDMADLS extends FunSuite {
           .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
           .save()
       }
-      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AuthCredential(appid, appkey, tenantid), conf)
+      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AppRegAuth(appid, appkey, tenantid), conf)
       val fs = FileSystem.get(serConf.value)
       val dataFolder = CDMDataFolder.getDataFolderWithDate()
       assert(fs.listStatus(new Path("/abort/TestEntity/"+dataFolder + "/")).length == 0)
@@ -2015,7 +2087,7 @@ class CDMADLS extends FunSuite {
           .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
           .save()
       }
-      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AuthCredential(appid, appkey, tenantid), conf)
+      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + outputContainer, AppRegAuth(appid, appkey, tenantid), conf)
       val fs = FileSystem.get(serConf.value)
       val dataFolder = CDMDataFolder.getDataFolderWithDate()
       assert(fs.listStatus(new Path("/abort/TestEntity/" + dataFolder + "/")).length == 0)
@@ -2228,7 +2300,135 @@ class CDMADLS extends FunSuite {
     } finally {
       cleanup(outputContainer, "/")
     }
+  }
 
+  test("config.json test with sastoken") {
+    try {
+      val timestamp1 = new java.sql.Timestamp(System.currentTimeMillis());
+      val timestamp2 = new java.sql.Timestamp(System.currentTimeMillis());
+      val cdata = Seq(
+        Row( timestamp1, timestamp2,1, "A", Decimal(33.5)),
+        Row( timestamp1, timestamp2, 2, "B", Decimal(42.1)),
+        Row( timestamp1, timestamp2, 3, "C", Decimal(7.90))
+      )
+
+      val cschema = new StructType()
+        .add(StructField("ValidFrom", TimestampType, true))
+        .add(StructField("ValidTo", TimestampType, true))
+        .add(StructField("CustomerId", IntegerType, true))
+        .add(StructField("CustomerName", StringType, true))
+        .add(StructField("CreditLimit", DecimalType(18, 2), true))
+
+      val customerdf = spark.createDataFrame(spark.sparkContext.parallelize(cdata), cschema)
+
+      customerdf.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/customer/default.manifest.cdm.json")
+        .option("entity", "TestEntity")
+        .option("entityDefinitionPath", "Customer.cdm.json/Customer")
+        .option("entityDefinitionModelRoot", "billalias")
+        .option("configPath", "/config")
+        .option("format", "parquet")
+        .option("sasToken", sastokenatroot)
+        .save()
+
+      customerdf.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/customerImplicit/default.manifest.cdm.json")
+        .option("entity", "TestEntity")
+        .option("format", "parquet")
+        .option("sasToken", sastokenatroot)
+        .save()
+
+      val custRead = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/customer/default.manifest.cdm.json")
+        .option("entity", "TestEntity")
+        .option("configPath", "/config")
+        .option("sasToken", sastokenatroot)
+        .load()
+
+      val pdata = Seq(
+        Row( timestamp1, timestamp2,1, "A"),
+        Row( timestamp1, timestamp2, 2, "B"),
+        Row( timestamp1, timestamp2, 3, "C")
+      )
+
+      val pschema = new StructType()
+        .add(StructField("ValidFrom", TimestampType, true))
+        .add(StructField("ValidTo", TimestampType, true))
+        .add(StructField("CustomerId", IntegerType, true))
+        .add(StructField("CustomerName", StringType, true))
+
+      val persondf = spark.createDataFrame(spark.sparkContext.parallelize(pdata), pschema)
+
+      persondf.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/person/default.manifest.cdm.json")
+        .option("entity", "TestEntity")
+        .option("entityDefinitionPath", "Person.cdm.json/Person")
+        .option("entityDefinitionModelRoot", "billalias")
+        .option("sasToken", sastokenatroot)
+        .save()
+
+      val personRead = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/person/default.manifest.cdm.json")
+        .option("entity", "TestEntity")
+        .option("sasToken", sastokenatroot)
+        .load()
+
+      assert(custRead.except(customerdf).count() == 0)
+      assert(personRead.except(persondf).count() == 0)
+
+      // Negative test - invalid config.json path
+      val invalidConfigPath = "/config1"
+      var caught = intercept[RuntimeException] {
+        customerdf.write.format("com.microsoft.cdm")
+          .option("storage", storageAccountName)
+          .option("manifestPath", outputContainer + "/configTest/default.manifest.cdm.json")
+          .option("entity", "TestEntity")
+          .option("entityDefinitionPath", "Customer.cdm.json/Customer")
+          .option("entityDefinitionModelRoot", "billalias")
+          .option("configPath", invalidConfigPath)
+          .option("sasToken", sastokenatroot)
+          .save()
+      }
+      assert(caught.getMessage == String.format(Messages.configJsonPathNotFound, invalidConfigPath))
+
+      // Negative test - arbitrary namespace + config path option not provided on write
+      val caught2 = intercept[java.util.concurrent.ExecutionException] {
+        customerdf.write.format("com.microsoft.cdm")
+          .option("storage", storageAccountName)
+          .option("manifestPath", outputContainer + "/root/default.manifest.cdm.json")
+          .option("entity", "TestEntity")
+          .option("entityDefinitionPath", "Customer.cdm.json/Customer")
+          .option("entityDefinitionModelRoot", "billaliaswithoutconfig")
+          .option("sasToken", sastokenatroot)
+          .save()
+      }
+      assert(caught2.getMessage == String.format(Messages.overrideConfigJson, "java.lang.Exception: StorageManager | Adapter not found for the namespace 'core' | fetchAdapter"))
+
+      // Negative test - arbitrary namespace + incorrect location of namespace
+      val caught3 = intercept[java.util.concurrent.ExecutionException] {
+        customerdf.write.format("com.microsoft.cdm")
+          .option("storage", storageAccountName)
+          .option("manifestPath", outputContainer + "/root/default.manifest.cdm.json")
+          .option("entity", "TestEntity")
+          .option("entityDefinitionPath", "Customer.cdm.json/Customer")
+          .option("entityDefinitionModelRoot", "billaliaaswronglocation")
+          .option("sasToken", sastokenatroot)
+          .save()
+      }
+      assert(caught3.getCause.getMessage.startsWith( "PersistenceLayer | Could not read '/TrackedEntity.cdm.json' from the 'core' namespace."))
+    } catch {
+      case e: Exception=> {
+        println("Exception: " + e.printStackTrace())
+        assert(false)
+      };
+    } finally {
+      cleanup(outputContainer, "/")
+    }
   }
 
   test("negative test - entityDefinitionStorage with App Creds") {
@@ -2242,6 +2442,22 @@ class CDMADLS extends FunSuite {
         .option("entityDefinitionModelRoot", "outputsubmanifest/example-public-standards")
         .option("entityDefinitionStorage", "abc.dfs.core.windows.net")
         .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
+        .save()
+    }
+    assert(caught.getMessage.equals(Messages.entityDefStorageAppCredError))
+  }
+
+  test("negative test - entityDefinitionStorage with sastoken") {
+    val df = testdata.prepareDataWithAllTypes()
+    val caught = intercept[java.lang.IllegalArgumentException] {
+      df.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/dataTypeExplicit/default.manifest.cdm.json")
+        .option("entity", "DataTypeExplicit")
+        .option("entityDefinitionPath", "core/applicationCommon/DataType.cdm.json/DataType")
+        .option("entityDefinitionModelRoot", "outputsubmanifest/example-public-standards")
+        .option("entityDefinitionStorage", "abc.dfs.core.windows.net")
+        .option("sasToken", sastokenatroot)
         .save()
     }
     assert(caught.getMessage.equals(Messages.entityDefStorageAppCredError))
@@ -2381,7 +2597,141 @@ class CDMADLS extends FunSuite {
     } finally {
       cleanup(outputContainer, "/")
     }
+  }
 
+  test("Switch to DataTypes with sastoken") {
+    try{
+      val date = java.sql.Date.valueOf("2015-03-31");
+      val timestamp =  new Timestamp(System.currentTimeMillis());
+      val byteVal = 2.toByte
+      val shortVal = 129.toShort
+      val data = Seq(
+        Row("tim", 1, true, 12.34, 6L, date, Decimal(999.00), timestamp, 2f, byteVal, shortVal),
+        Row("tddim", 1, false, 13.34, 7L, date, Decimal(3.3), timestamp, 3.59f, byteVal, shortVal),
+        Row("tddim", 1, false, 13.34, 7L, date, Decimal(3.3), timestamp, 3.59f, byteVal, shortVal)
+      )
+
+      val schema = new StructType()
+        .add(StructField("name", StringType, true))
+        .add(StructField("id", IntegerType, true))
+        .add(StructField("flag", BooleanType, true))
+        .add(StructField("salary", DoubleType, true))
+        .add(StructField("phone", LongType, true))
+        .add(StructField("dob", DateType, true))
+        .add(StructField("weight", DecimalType(Constants.DECIMAL_PRECISION, 2), true))
+        .add(StructField("time", TimestampType, true))
+        .add(StructField("float", FloatType, true))
+        .add(StructField("byte", ByteType, true))
+        .add(StructField("short", ShortType, true))
+
+      val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+      df.show(false)
+      // Implicit Parquet Write
+      df.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/dataTypeImplicit/default.manifest.cdm.json")
+        .option("entity", "DataTypeImplicit")
+        .option("format", "parquet")
+        .option("compression", "gzip")
+        .option("sasToken", sastokenatroot)
+        .save()
+
+      val readImplicit = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/dataTypeImplicit/default.manifest.cdm.json")
+        .option("entity", "DataTypeImplicit")
+        .option("sasToken", sastokenatroot)
+        .load()
+      readImplicit.show(false)
+
+      // Explicit csv write
+      df.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/dataTypeExplicit/default.manifest.cdm.json")
+        .option("entity", "DataTypeExplicit")
+        .option("entityDefinitionPath", "core/applicationCommon/DataType.cdm.json/DataType")
+        .option("entityDefinitionModelRoot", "outputsubmanifest/example-public-standards")
+        .option("sasToken", sastokenatroot)
+        .save()
+
+      val readExplicit = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/dataTypeExplicit/default.manifest.cdm.json")
+        .option("entity", "DataTypeExplicit")
+        .option("sasToken", sastokenatroot)
+        .load()
+
+      readExplicit.show(false)
+
+      // Implicit Overwrite
+      df.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/dataTypeImplicit/default.manifest.cdm.json")
+        .option("entity", "DataTypeImplicit")
+        .option("format", "parquet")
+        .option("compression", "gzip")
+        .option("sasToken", sastokenatroot)
+        .mode(SaveMode.Overwrite)
+        .save()
+
+      val readOverwrite = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/dataTypeImplicit/default.manifest.cdm.json")
+        .option("entity", "DataTypeImplicit")
+        .option("sasToken", sastokenatroot)
+        .load()
+
+      readOverwrite.show(false);
+
+      // Test dateTimeOffset csv
+      df.write.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/offset/default.manifest.cdm.json")
+        .option("entity", "Offset")
+        .option("entityDefinitionPath", "core/applicationCommon/DateTimeOffset.cdm.json/DateTimeOffset")
+        .option("entityDefinitionModelRoot", "outputsubmanifest/example-public-standards")
+        .option("sasToken", sastokenatroot)
+        .save()
+
+
+      val readOff = spark.read.format("com.microsoft.cdm")
+        .option("storage", storageAccountName)
+        .option("manifestPath", outputContainer + "/offset/default.manifest.cdm.json")
+        .option("entity", "Offset")
+        .option("sasToken", sastokenatroot)
+        .load()
+
+      readOff.show(false);
+
+      val rowDf = df.head()
+      val rowsExplicit = readExplicit.head(2)
+      val row0 =  rowsExplicit.apply(0)
+      val rowsImplicit = readImplicit.head(2)
+      val row1 =  rowsImplicit.apply(0)
+      val rowsOverwrite = readOverwrite.head(2)
+      val row2 =  rowsOverwrite.apply(0)
+      val rowsOffset = readOff.head(2)
+      val row3 =  rowsOffset.apply(0)
+
+      for (row <- Seq(row0, row1, row2, row3)){
+        assert(row.getString(0) == rowDf.getString(0))
+        assert(row.getInt(1) == rowDf.getInt(1))
+        assert(row.getBoolean(2) == rowDf.getBoolean(2))
+        assert(row.getDouble(3) == rowDf.getDouble(3))
+        assert(row.getLong(4) == rowDf.getLong(4))
+        assert(row.getDate(5) == rowDf.getDate(5))
+        assert(row.getDecimal(6) == rowDf.getDecimal(6))
+        assert(row.getTimestamp(7) == rowDf.getTimestamp(7))
+        assert(row.getFloat(8) == rowDf.getFloat(8))
+      }
+    } catch {
+      case e: Exception=> {
+        println("Exception: " + e.printStackTrace())
+        assert(false)
+      };
+    } finally {
+      cleanup(outputContainer, "/")
+    }
   }
 
   test ("CDMSource option") {
@@ -3691,7 +4041,7 @@ class CDMADLS extends FunSuite {
           header += attributeDef.getName
         }
       }
-      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, container, AuthCredential(appid, appkey, tenantid), conf)
+      val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, container, AppRegAuth(appid, appkey, tenantid), conf)
       val path = new Path("/"+part.getLocation)
       val fs = path.getFileSystem(serConf.value)
       val outputStream: FSDataOutputStream = fs.create(path)
@@ -3746,7 +4096,7 @@ class CDMADLS extends FunSuite {
       }
     }
 
-    val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + containerIn, AuthCredential(appid, appkey, tenantid), conf)
+    val serConf = SerializedABFSHadoopConf.getConfiguration(storageAccountName, "/" + containerIn, AppRegAuth(appid, appkey, tenantid), conf)
     val path = new Path(rpath + "/" + entDef.getEntityName + "/" + part.getLocation)
     val fs = path.getFileSystem(serConf.value)
     val outputStream: FSDataOutputStream = fs.create(path)
