@@ -5,7 +5,7 @@ import java.util.Arrays
 
 import com.microsoft.cdm.DefaultSource
 import com.microsoft.cdm.utils.StructTypeMetadata._
-import com.microsoft.cdm.utils.{AuthCredential, CDMDataFormat, CDMDataType, Constants, SerializedABFSHadoopConf}
+import com.microsoft.cdm.utils.{AppRegAuth, Auth, CDMDataFormat, CDMDataType, Constants, SerializedABFSHadoopConf}
 import com.microsoft.commondatamodel.objectmodel.cdm._
 import com.microsoft.commondatamodel.objectmodel.enums.{CdmDataFormat, CdmObjectType}
 import com.microsoft.commondatamodel.objectmodel.persistence.cdmfolder.TypeAttributePersistence
@@ -194,7 +194,7 @@ class CDMUnitTests extends FunSuite with PrivateMethodTester  {
         header += attributeDef.getName
       }
     }
-    val serConf = SerializedABFSHadoopConf.getConfiguration(storage, "/globaltestfeb6" , AuthCredential(appid, appkey, tenantid), conf)
+    val serConf = SerializedABFSHadoopConf.getConfiguration(storage, "/globaltestfeb6" , AppRegAuth(appid, appkey, tenantid), conf)
     val path = new Path("/root/"+entDef.getEntityName+"/"+part.getLocation)
     val fs = path.getFileSystem(serConf.value)
     val outputStream: FSDataOutputStream = fs.create(path)

@@ -41,6 +41,7 @@ object Constants {
   var MODE = ""
   var MODEL_JSON = "model.json"
   var KUSTO_ENABLED = true
+  var SASTOKEN_CONF_SETTING = "com.microsoft.cdm.sastoken"
 
   // For permissive/fail fast CSV reading mode.
   // Could be an Enumeration, but strings enable case-insensitive comparison

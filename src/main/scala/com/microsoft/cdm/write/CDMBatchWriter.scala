@@ -3,7 +3,7 @@ package com.microsoft.cdm.write
 import java.io.IOException
 
 import com.microsoft.cdm.log.SparkCDMLogger
-import com.microsoft.cdm.utils.{CDMDataFormat, CDMDecimalType, CDMModelWriter, CDMTokenProvider, Constants, DataConverter, Messages, SchemaDiffOutput, SerializedABFSHadoopConf}
+import com.microsoft.cdm.utils.{CDMDataFormat, CDMDecimalType, CDMModelWriter, CDMTokenProvider, CdmAuthType, Constants, DataConverter, Messages, SchemaDiffOutput, SerializedABFSHadoopConf}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.parquet.hadoop.util.HadoopOutputFile
 import org.apache.spark.sql.SaveMode
@@ -18,9 +18,9 @@ class CDMBatchWriter(jobId: String, writeMode: SaveMode, schema: StructType, cdm
 
   val logger  = LoggerFactory.getLogger(classOf[CDMBatchWriter])
 
-  val serializedHadoopConf = SerializedABFSHadoopConf.getConfiguration(cdmOptions.storage, cdmOptions.container, cdmOptions.authCreds, cdmOptions.conf)
+  val serializedHadoopConf = SerializedABFSHadoopConf.getConfiguration(cdmOptions.storage, cdmOptions.container, cdmOptions.auth, cdmOptions.conf)
 
-  val tokenProvider =  if (cdmOptions.authCreds.appId.isEmpty) Some(new CDMTokenProvider(serializedHadoopConf, cdmOptions.storage)) else None
+  val tokenProvider =  if (cdmOptions.auth.getAuthType == CdmAuthType.Token.toString()) Some(new CDMTokenProvider(serializedHadoopConf, cdmOptions.storage)) else None
 
   val cdmModel = new CDMModelWriter(cdmOptions.storage,
                                     cdmOptions.container,
@@ -33,7 +33,7 @@ class CDMBatchWriter(jobId: String, writeMode: SaveMode, schema: StructType, cdm
                                     cdmOptions.entDefContAndPath,
                                     jobId,
                                     cdmOptions.fileFormatSettings,
-                                    cdmOptions.authCreds, tokenProvider,
+                                    cdmOptions.auth, tokenProvider,
                                     cdmOptions.overrideConfigPath,
                                     cdmOptions.cdmSource,
                                     cdmOptions.entityDefinitionStorage,

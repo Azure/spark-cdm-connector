@@ -39,9 +39,9 @@ libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "p
 libraryDependencies += "com.google.guava" % "guava" % "14.0.1" % "provided"
 libraryDependencies += "commons-io" % "commons-io" % "2.4" % "provided"
 libraryDependencies += "com.microsoft.azure" % "adal4j" % "1.6.3"
-//libraryDependencies += "com.microsoft.azure" % "msal4j" % "1.10.1"
-libraryDependencies += "org.apache.hadoop" % "hadoop-azure" % "3.2.0" % "provided"
-libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "3.2.0" % "provided"
+libraryDependencies += "com.microsoft.azure" % "msal4j" % "1.10.1" % "provided"
+libraryDependencies += "org.apache.hadoop" % "hadoop-azure" % "3.3.1" % "provided"
+libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "3.3.1" % "provided"
 
 libraryDependencies += "org.wildfly.openssl" % "wildfly-openssl" % "1.0.7.Final" % "provided"
 
