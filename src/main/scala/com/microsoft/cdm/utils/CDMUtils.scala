@@ -8,6 +8,7 @@ import com.microsoft.commondatamodel.objectmodel.enums.CdmStatusLevel
 import com.microsoft.commondatamodel.objectmodel.utilities.EventCallback
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.sql.types.StructType
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 
 import util.control.Breaks._
@@ -15,7 +16,6 @@ import scala.collection.mutable.ArrayBuffer
 
 case class CDMEntity(rootManifest: CdmManifestDefinition, parentManifest: CdmManifestDefinition, entityDec:CdmEntityDeclarationDefinition, var schema: StructType)
 case class SchemaDiffOutput(isSame: Boolean, diffIndex: Int, path: ArrayBuffer[String])
-case class AuthCredential(appId: String, appKey: String, tenantId: String)
 case class CDMDecimalType(precision: Int, scale: Int)   {
   override def toString() : String = {
     this.getClass.getName + precision + scale;
@@ -60,21 +60,23 @@ object SparkPlatform extends Enumeration {
 
 // callback implementation to fetch Logs from CDM SDK
 object CDMCallback extends EventCallback {
-
   val fromCDMSDK = "CDM-SDK Library"
+  val logger  = LoggerFactory.getLogger(fromCDMSDK)
 
   override def apply(cdmStatusLevel: CdmStatusLevel, message: String): Unit = {
-  //  println(message +" ========= " + cdmStatusLevel.toString)
-    if(cdmStatusLevel == CdmStatusLevel.Error) {
+    // Dev debug
+    // println(s"[${cdmStatusLevel}] ${message}")
 
+    if(cdmStatusLevel == CdmStatusLevel.Error) {
+      SparkCDMLogger.log(Level.ERROR, message, logger)
       SparkCDMLogger.logEventToKusto(fromCDMSDK, "", Level.ERROR, message)
-      if(message.contains("saveDocumentAsAsync")) {
+      if (message.contains("saveDocumentAsAsync")) {
         throw new Exception(message)
       }
-      if(message.contains("Adapter not found for the namespace") && Constants.MODE.equals("write")) {
+      if (message.contains("Adapter not found for the namespace") && Constants.MODE.equals("write")) {
         throw new Exception(String.format(Messages.overrideConfigJson, message))
       }
-      if(Constants.MODE.equals("write")) {
+      if (Constants.MODE.equals("write")) {
         throw new Exception(message)
       }
     }
