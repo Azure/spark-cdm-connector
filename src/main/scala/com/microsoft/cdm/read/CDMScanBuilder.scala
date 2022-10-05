@@ -14,7 +14,7 @@ class CDMScanBuilder (cdmOptions: CDMReadOptions) extends ScanBuilder {
                                                  cdmOptions.manifestFileName,
                                                  cdmOptions.entity,
                                                  cdmOptions.entDefContAndPath,
-                                                 cdmOptions.authCreds,
+                                                 cdmOptions.auth,
                                                  cdmOptions.conf,
                                                  new DataConverter(),
                                                  cdmOptions.cdmSource,
