@@ -26,7 +26,7 @@ class CDMModelCommon (storage: String,
                       entityName: String,
                       entDefinition: String,
                       entDefContAndPath: String,
-                      authCredential: AuthCredential,
+                      auth: Auth,
                       tokenProvider: Option[CDMTokenProvider],
                       overrideConfigPath : String,
                       var cdmSource: CDMSource.Value,
@@ -43,7 +43,7 @@ class CDMModelCommon (storage: String,
   val rootPath  = container + manifestPath.dropRight(1)
   SparkCDMLogger.log(Level.INFO, "Path for ADLSAdapter: " + storage + rootPath, logger)
 
-  val adlsAdapter = CdmAdapterProvider(storage, rootPath, authCredential, tokenProvider)
+  val adlsAdapter = CdmAdapterProvider(storage, rootPath, auth, tokenProvider)
   cdmCorpus.getStorage.mount(Constants.SPARK_NAMESPACE, adlsAdapter)
 
 
@@ -55,7 +55,7 @@ class CDMModelCommon (storage: String,
     cdmCorpus.getStorage.mount(Constants.SPARK_MODELROOT_NAMESPACE, cdmSourceAdapter)
   } else {
 
-    val cdmADLSAdapter = CdmAdapterProvider(entityDefinitionStorage, entDefContAndPath, authCredential, tokenProvider)
+    val cdmADLSAdapter = CdmAdapterProvider(entityDefinitionStorage, entDefContAndPath, auth, tokenProvider)
     cdmCorpus.getStorage.mount(Constants.SPARK_MODELROOT_NAMESPACE, cdmADLSAdapter)
 
     // If overrideConfigPath is not present, look for config.json in SparkModelRoot path.
@@ -90,7 +90,7 @@ class CDMModelCommon (storage: String,
   }
 
 
-  setSecretToAllNamespace()
+  setAuthMechanismTOAllNamespace()
   cdmCorpus.getStorage.setDefaultNamespace(Constants.SPARK_NAMESPACE)
 
   val dataConverter = new DataConverter()
@@ -98,7 +98,7 @@ class CDMModelCommon (storage: String,
   // Read the config path and mount it to corpus
   def mountFromOverrideConfigPath() = {
 
-    val configAdaptor = CdmAdapterProvider(storage, overrideConfigPath, authCredential, tokenProvider)
+    val configAdaptor = CdmAdapterProvider(storage, overrideConfigPath, auth, tokenProvider)
     cdmCorpus.getStorage.mount("configAdls", configAdaptor)
     try {
       val config = cdmCorpus.getStorage.fetchAdapter("configAdls").readAsync("config.json").get()
@@ -111,10 +111,16 @@ class CDMModelCommon (storage: String,
   }
 
   // set the same secret/token to all the Adls Adapter definitions, since we are using a single ADLS account.
-  def setSecretToAllNamespace() = {
+  def setAuthMechanismTOAllNamespace() = {
     cdmCorpus.getStorage.getNamespaceAdapters.values.asScala.foreach({ case (value: StorageAdapter) =>
       if(value.isInstanceOf[AdlsAdapter]) {
-        if (authCredential.appId.isEmpty) value.asInstanceOf[AdlsAdapter].setTokenProvider(tokenProvider.get) else value.asInstanceOf[AdlsAdapter].setSecret(authCredential.appKey)
+        if (auth.getAuthType == CdmAuthType.Token.toString()) {
+          value.asInstanceOf[AdlsAdapter].setTokenProvider(tokenProvider.get)
+        } else if (auth.getAuthType == CdmAuthType.AppReg.toString()) {
+          value.asInstanceOf[AdlsAdapter].setSecret(auth.getAppKey)
+        } else {
+          value.asInstanceOf[AdlsAdapter].setSasToken(auth.getSASToken)
+        }
       }
     })
   }
