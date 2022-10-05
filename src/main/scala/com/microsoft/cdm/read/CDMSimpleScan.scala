@@ -48,9 +48,9 @@ class CDMSimpleScan(val storage: String,
 
   override def toBatch: Batch = this
 
-  def getReader(fType: String, uriPath: String, filePath: String, schema: StructType, serializedHadoopConf: SparkSerializableConfiguration, delimiter: Char, hasHeader: Boolean): ReaderConnector ={
+  def getReader(fType: String, uriPath: String, filePath: String, schema: StructType, serializedHadoopConf: SparkSerializableConfiguration, delimiter: Char): ReaderConnector ={
     return fType match {
-      case   "is.partition.format.CSV" => new CSVReaderConnector(uriPath, filePath, serializedHadoopConf, delimiter, mode, schema, hasHeader)
+      case   "is.partition.format.CSV" => new CSVReaderConnector(uriPath, filePath, serializedHadoopConf, delimiter, mode)
       case   "is.partition.format.parquet" => new ParquetReaderConnector(uriPath, filePath, schema, serializedHadoopConf)
     }
   }
@@ -79,8 +79,8 @@ class CDMSimpleScan(val storage: String,
       // Decode strings because hadoop cannot parse URI-encoded strings
       val decodedFilePath = URLDecoder.decode(manifestPath + relPath, "UTF-8")
 
-      //we track hasHeader and pass it in to the reader so that we know if the first line is a header row
-      var hasHeader = false
+      //we track the header and pass it in to the reader so that we know if the first line is a header row
+      var header = false
       val schema = readSchema();
       var delimiter = Constants.DEFAULT_DELIMITER
       val fileReader = {
@@ -94,7 +94,7 @@ class CDMSimpleScan(val storage: String,
           val arguments = traits.asInstanceOf[CdmTraitReference].getArguments().asScala
           val headerArg = arguments.find(_.getName() == "columnHeaders")
           if (headerArg != None) {
-            hasHeader = headerArg.get.getValue().toString.toBoolean
+            header = headerArg.get.getValue().toString.toBoolean
           }
           val delimiterArg = arguments.find(_.getName() == "delimiter")
           if (delimiterArg != None) {
@@ -102,18 +102,18 @@ class CDMSimpleScan(val storage: String,
             if(strDelimiter.length > 1) throw new IllegalArgumentException(String.format(Messages.invalidDelimiterCharacter, strDelimiter))
             delimiter = strDelimiter.charAt(0)
           }
-          val reader = getReader(traits.getNamedReference, uriPrefix, decodedFilePath, schema, serializedHadoopOConf, delimiter, hasHeader)
+          val reader = getReader(traits.getNamedReference, uriPrefix, decodedFilePath, schema, serializedHadoopOConf, delimiter)
           if (reader.isInstanceOf[ParquetReaderConnector] && Constants.PERMISSIVE.equalsIgnoreCase(mode)) {
             throw new IllegalArgumentException(String.format(Messages.invalidPermissiveMode))
           }
           reader
         } else {
           SparkCDMLogger.log(Level.DEBUG, "No Named Reference Trait \"is.partition.format\" (CSV/Parquet", logger)
-          new CSVReaderConnector(uriPrefix, decodedFilePath, serializedHadoopOConf, delimiter, mode, schema, hasHeader)
+          new CSVReaderConnector(uriPrefix, decodedFilePath, serializedHadoopOConf, delimiter, mode)
         }
       }
 
-      factoryList.add(new CDMInputPartition(storage, container, fileReader, hasHeader, schema, dataConverter, mode))
+      factoryList.add(new CDMInputPartition(storage, container, fileReader, header, readSchema(), dataConverter, mode))
     }
     SparkCDMLogger.log(Level.DEBUG, "Count of partitions - "+eDec.getDataPartitions.size() + " Entity - " + eDec.getEntityName + " Manifest -"+ man.getManifestName, logger)
     factoryList.asScala.toArray

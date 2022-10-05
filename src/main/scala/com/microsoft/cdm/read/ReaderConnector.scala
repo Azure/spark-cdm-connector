@@ -26,10 +26,9 @@ trait ReaderConnector extends Serializable {
    * This method is to used to convert to Spark/CDM data types
    * @param dataType
    * @param col
-   * @param schemaIndex Used in CSVReaderConnector for schema mapping. In ParquetReaderConnector, it has no functional purpose other than keeping the same interface.
    * @return
    */
-  def jsonToData(dataType: DataType, col: Any, schemaIndex: Int, mode: String): Any
+  def jsonToData(dataType: DataType, col: Any, mode: String): Any
 
 
   def isValidRow(): Boolean

@@ -207,14 +207,14 @@ class ParquetReaderConnector(httpPrefix: String,
 
   def isValidRow(): Boolean = true
 
-  def jsonToData(dt: DataType, value: Any, schemaIndex: Int, mode: String): Any = {
+  def jsonToData(dt: DataType, value: Any, mode: String): Any = {
     return dt match {
       case ar: ArrayType => {
         util.Try({
           val structs = value.toString.split(" ")
           val seq = structs.zipWithIndex.map{ case (col, index) =>
             val dataType = ar.elementType
-            jsonToData(dataType, col, schemaIndex, mode)
+            jsonToData(dataType, col, mode)
           }
           ArrayData.toArrayData(seq)
         }).getOrElse(null)
@@ -242,7 +242,7 @@ class ParquetReaderConnector(httpPrefix: String,
           val arr = deSerializeObject(value.toString.getBytes());
           val seq = arr.zipWithIndex.map { case (col, index) =>
             val dataType = st.fields(index).dataType
-            jsonToData(dataType, col, schemaIndex, mode)
+            jsonToData(dataType, col, mode)
           }
           val isAllNull = arr.forall(x => x == null)
           if (isAllNull) null else InternalRow.fromSeq(seq)
