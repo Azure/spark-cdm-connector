@@ -29,8 +29,8 @@ The following scenarios are supported:
   |CDM Version| Spark Version|
   |--|--|
   |0.x|2.4|
-  |spark3.1-1.19.3|3.1.x|
-  |spark3.2-1.19.3|3.2.x|
+  |spark3.1-1.x|3.1.x|
+  |spark3.2-1.x|3.2.x|
 - Reading data from an entity in a CDM folder into a Spark dataframe.
 - Writing from a Spark dataframe to an entity in a CDM folder based on a CDM entity definition.
 - Writing from a Spark dataframe to an entity in a CDM folder based on the dataframe schema.
