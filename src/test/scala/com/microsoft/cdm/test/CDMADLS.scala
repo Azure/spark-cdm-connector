@@ -2988,7 +2988,8 @@ class CDMADLS extends FunSuite {
           .option("appId", appid).option("appKey", appkey).option("tenantId", tenantid)
           .save()
       }
-      assert(caught.getMessage == "Table `"+ storageAccountName+ "`./output.`copy-wwi.manifest.cdm.json`.NewWarehousePackageTypes already exists")
+      val expectedErr = s"Table `${storageAccountName}`.`/output`.`copy-wwi.manifest.cdm.json`.NewWarehousePackageTypes already exists"
+      assert(caught.getMessage == expectedErr, s"Message found was actually: ${caught.getMessage}")
     }
     catch {
       case e: Exception=> {
