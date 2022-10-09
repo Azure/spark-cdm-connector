@@ -17,7 +17,7 @@ pomPostProcess := { (node: XmlNode) =>
   }).transform(node).head
 }
 
-version := "1.19.3"
+version := "spark3.1-1.19.3"
 
 crossPaths := false
 ThisBuild / scalaVersion := "2.12.13"
@@ -39,7 +39,7 @@ libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "p
 libraryDependencies += "com.google.guava" % "guava" % "14.0.1" % "provided"
 libraryDependencies += "commons-io" % "commons-io" % "2.4" % "provided"
 libraryDependencies += "com.microsoft.azure" % "adal4j" % "1.6.3"
-libraryDependencies += "com.microsoft.azure" % "msal4j" % "1.10.1" % "provided"
+libraryDependencies += "com.microsoft.azure" % "msal4j" % "1.10.1"
 libraryDependencies += "org.apache.hadoop" % "hadoop-azure" % "3.3.1" % "provided"
 libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "3.3.1" % "provided"
 

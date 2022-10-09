@@ -29,7 +29,8 @@ The following scenarios are supported:
   |CDM Version| Spark Version|
   |--|--|
   |0.x|2.4|
-  |1.x|3.1, 3.2|
+  |spark3.1-1.x|3.1.x|
+  |spark3.2-1.x|3.2.x|
 - Reading data from an entity in a CDM folder into a Spark dataframe.
 - Writing from a Spark dataframe to an entity in a CDM folder based on a CDM entity definition.
 - Writing from a Spark dataframe to an entity in a CDM folder based on the dataframe schema.
@@ -46,7 +47,7 @@ The following capabilities or limitations apply:
 - Supports writing data using user modifiable partition patterns.
 - Supports use of managed identity, app credentials, and SAS Token for authentication.
 - Supports resolving CDM aliases locations used in imports using CDM adapter definitions described in a config.json
-- **Parallel writes are not recommended.** There is no locking mechanism since metadata is saved as a file in storage.
+- **Parallel writes are not supported. It is not recommended.** There is no locking mechanism at the storage layer.
 
 See also _Known issues_ section at the end of this document.
 
