@@ -47,7 +47,7 @@ The following capabilities or limitations apply:
 - Supports writing data using user modifiable partition patterns.
 - Supports use of managed identity, app credentials, and SAS Token for authentication.
 - Supports resolving CDM aliases locations used in imports using CDM adapter definitions described in a config.json
-- **Parallel writes are not recommended.** There is no locking mechanism since metadata is saved as a file in storage.
+- **Parallel writes are not supported. It is not recommended.** There is no locking mechanism at the storage layer.
 
 See also _Known issues_ section at the end of this document.
 
