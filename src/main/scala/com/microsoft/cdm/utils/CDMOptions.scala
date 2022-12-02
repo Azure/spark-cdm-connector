@@ -62,7 +62,7 @@ class CDMOptions(options: CaseInsensitiveStringMap) {
 
   private def getRequiredArgument(options: CaseInsensitiveStringMap, arg: String): String = {
     val result = if (options.containsKey(arg)) options.get(arg) else  {
-      throw new Exception(arg + "argument required")
+      throw new Exception(s"'$arg' is a required argument!")
     }
     result
   }
