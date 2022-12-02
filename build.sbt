@@ -17,7 +17,7 @@ pomPostProcess := { (node: XmlNode) =>
   }).transform(node).head
 }
 
-version := "spark3.2-1.19.3"
+version := "spark3.2-1.19.4"
 
 crossPaths := false
 ThisBuild / scalaVersion := "2.12.15"
@@ -69,7 +69,8 @@ lazy val grandchild = Project("DatabricksADTokenMock", file("DatabricksTokenProv
 assemblyShadeRules in assembly := Seq(
   ShadeRule.rename("com.fasterxml.jackson.**" -> "shadeio.@1").inAll,
   ShadeRule.rename("com.nimbusds.**" -> "shadeionimbusds.@1").inAll,
-  ShadeRule.rename("com.microsoft.aad.adal4j.**" -> "shadeioadal4j.@1").inAll
+  ShadeRule.rename("com.microsoft.aad.adal4j.**" -> "shadeioadal4j.@1").inAll,
+  ShadeRule.rename("com.microsoft.aad.msal4j.**" -> "shadeiomsal4j.@1").inAll
 )
 
 

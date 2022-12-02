@@ -46,14 +46,6 @@ class CDMDataReader(val storage: String,
     row != null
   }
 
-  def createTempFile(in: InputStream): File = {
-    val tempFile = File.createTempFile("data", ".parquet")
-    tempFile.deleteOnExit()
-    val out = new FileOutputStream(tempFile)
-    try IOUtils.copy(in, out)
-    finally if (out != null) out.close()
-    tempFile
-  }
   /**
    * Called by the Spark runtime if there is data left to read.
    * @return The next row of data.
