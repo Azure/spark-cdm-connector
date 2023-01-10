@@ -36,9 +36,31 @@ body:
     validations:
       required: true
 
+  - type: markdown
+    attributes:
+      value: |
+        # Platform Details
 
+  - type: input
+    attributes:
+      label: Platform name
+      description: "What platform are you using? Azure Synapse?"
+    validations:
+      required: true
 
-
+  - type: input
+    attributes:
+      label: Spark version
+      description: "What Spark version are you running?"
+    validations:
+      required: true
+      
+  - type: input
+    attributes:
+      label: Jar version
+      description: "What jar version are you using?"
+    validations:
+      required: true
 
 
 
