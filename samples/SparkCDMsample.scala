@@ -51,7 +51,7 @@ df.write.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
   .option("manifestPath", container + "/implicitTest/default.manifest.cdm.json")
   .option("entity", "TestEntity")
-  .option("delimiter", "|")  // Specify what delimiter will be set in the CSV file. Default is comma
+  .option("delimiter", ";")  // Specify what delimiter will be set in the CSV file. Default is comma
   .option("columnHeaders", false)  // Specify a boolean value - where column header will be shown or not
   .option("dataFolderFormat", "'year'yyyy'/month'MM")  // Specify data partitions folder with DateTimeFormatter format
   .option("cdmSource", "builtin") // This fetches the foundation definitions from CDM SDK library
