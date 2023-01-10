@@ -13,10 +13,10 @@ body:
         1. Provide a good title starting with [BUG] or [ISSUE].
         2. Fill out all sections of this bug report form.
 
-- type: markdown
-    attributes:
-      value: |
-        # Platform Details
+  - type: markdown
+      attributes:
+        value: |
+          # Platform Details
         
   - type: input
     attributes:
