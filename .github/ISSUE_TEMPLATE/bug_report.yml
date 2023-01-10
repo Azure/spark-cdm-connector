@@ -23,10 +23,9 @@ body:
       label: Summary of issue
       description: >-
         Describe the issue you faced in this section.
-        Include the code you tried to execute (NOT A PICTURE) and enclose with ` ``` ` before and after to make it readable.
+        Include the code you tried to execute and enclose with ` ``` ` (on its own line) before and after to make it legible.
       placeholder: |
         I executed this code and ran into an error. The full error stack trace is included in the next section.
-        
         ```
         The code you tried to run.
         ```
