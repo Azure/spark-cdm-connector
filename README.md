@@ -9,5 +9,5 @@ Send mail to asksparkcdm@microsoft.com for questions or feedback about the conne
 For more information about CDM see: https://docs.microsoft.com/en-us/common-data-model/ 
 
 Samples to use the connector with Python and Scala can be found here:
-  - [Python sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsamplePython.ipynb).
-  - [Scala sample](https://github.com/Azure/spark-cdm-connector/blob/master/samples/SparkCDMsample.scala).
+  - [Python sample](samples/SparkCDMsamplePython.ipynb)
+  - [Scala sample](samples/SparkCDMsample.scala)
