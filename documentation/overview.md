@@ -154,7 +154,7 @@ In Synapse, the Spark CDM Connector supports use of [Managed identities for Azur
 
 You must ensure the identity used is granted access to the appropriate storage accounts.  Grant  **Storage Blob Data Contributor** to allow the library to write to CDM folders, or **Storage Blob Data Reader** to allow only read access. In both cases, no additional connector options are required. 
 
-#### SAS Token access control options ####
+#### SAS Token access control options
 SaS Token Credential authentication to storage accounts is an additional option for authentication to storage. With SAS token authentication, the SaS token can be at the container or folder level. The appropriate permissions (read/write) are required – read manifest/partition only needs read level support, while write requires read and write support.
 
 | **Option**   |**Description**  |**Pattern and example usage**  |
