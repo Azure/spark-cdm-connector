@@ -74,7 +74,7 @@ Entity partitions can be in a mix of formats, for example, a mix of CSV and parq
 
 When reading CSV data, the connector uses the Spark FAILFAST option by default [option](https://spark.apache.org/docs/latest/sql-data-sources-csv.html#data-source-option. It will throw an exception if the number of columns != the number of attributes in the entity. Alternativelly, as of 0.19, permissive mode is now supported by the Spark-CDM-Connector. This mode is only supported for CSV files. With the permissive mode, when a CSV row has fewer number of columns than than the entity schema, null values will be assigned for the missing columns. When a CSV row has more columns than the entity schema, the columns greater than the entity schema column count will be truncated to the schema column count. Usage is as follows:
 ```scala
-  .option("entity", "permissive") or .option("mode", "failfast")
+  .option("mode", "permissive") or .option("mode", "failfast")
 
 ```
 
