@@ -1,0 +1,18 @@
+name: 🪲 Report a bug
+description: Create a bug report to help improve Marlin Firmware
+title: "[BUG] (bug summary)"
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Do you want to ask a question? Are you looking for support? Please use one of the [support links](https://github.com/MarlinFirmware/Marlin/issues/new/choose).
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Instructions
+
+        Please follow the instructions below. Failure to do so may result in your issue being closed.
+
+        1. Provide a good title starting with [BUG].
+        2. Fill out all sections of this bug report form.
