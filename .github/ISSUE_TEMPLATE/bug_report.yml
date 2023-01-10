@@ -1,0 +1,73 @@
+name: Bug Report
+description: File a bug report or report an issue
+title: "[Issue] Summary here"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Instructions
+        
+        Please follow the instructions below. Failure to do so may result in your issue being closed.
+        
+        1. Provide a good title starting with [Bug] or [Issue].
+        2. Fill out all sections of this bug report form.
+
+  - type: markdown
+    attributes:
+      value: |
+        # Details
+
+  - type: textarea
+    attributes:
+      label: Summary of issue
+      description: >-
+        Describe the issue you faced in this section.
+        Include the code you tried to execute and enclose with ` ``` ` (on its own line) before and after to make it legible.
+        Include any details about your dataframe or CDM schema if you think it helps explain the issue.
+      placeholder: |
+        I followed these steps and ran into an error. The full error stack trace is included in the next section.
+        ```
+        The code you tried to run.
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Error stack trace
+      description: >-
+        Add the **full error stack trace** if applicable. The UI should probably show it or you can go into the driver logs and get it.
+      placeholder: |
+        ```
+        Some error stack trace here.
+        ```
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        # Platform and Setup
+
+  - type: input
+    attributes:
+      label: Platform name
+      description: "What platform are you using? Azure Synapse?"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Spark version
+      description: "What Spark version is the platform running?"
+    validations:
+      required: true
+      
+  - type: input
+    attributes:
+      label: CDM jar version
+      description: |
+        What jar version are you using? If you don't know, you can also run this scala code: `com.microsoft.cdm.BuildInfo.version`
+    validations:
+      required: true
