@@ -24,6 +24,7 @@ body:
       description: >-
         Describe the issue you faced in this section.
         Include the code you tried to execute and enclose with ` ``` ` (on its own line) before and after to make it legible.
+        Include any details about your dataframe or CDM schema if you think it helps explain the issue.
       placeholder: |
         I followed these steps and ran into an error. The full error stack trace is included in the next section.
         ```
