@@ -71,10 +71,6 @@ body:
     attributes:
       label: CDM jar version
       description: |
-        What jar version are you using? You can also run this code:
-        ```
-        %%spark
-        com.microsoft.cdm.BuildInfo.version
-        ```
+        What jar version are you using? You can also run this scala code: `com.microsoft.cdm.BuildInfo.version`
     validations:
       required: true
