@@ -21,14 +21,20 @@ body:
   - type: textarea
     attributes:
       label: Summary of issue
-      description: >-
-        Describe the bug in this section. Tell us what you were trying to do and what
-        happened that you did not expect. Provide a clear and concise description of the
-        problem and include as many details as possible.
-
-        When pasting formatted text don't forget to put ` ``` ` (on its own line) before and after to make it readable.
+      description: |
+        Describe the issue you faced in this section.
+        Include the code you tried to execute and enclose with ` ``` ` (on its own line) before and after to make it readable.
       placeholder: |
-        It doesn't work.
+        I executed this code and it didn't work.
+        
+        ```
+        val outputContainer = "mycontainer"
+        df.write.format("com.microsoft.cdm")
+        .option("storage", "mystorage.dfs.core.windows.net")
+        .option("manifestPath", outputContainer + "/folder1/default.manifest.cdm.json")
+        .option("entity", "TestEntity")
+        .save()
+        ```
     validations:
       required: true
 
