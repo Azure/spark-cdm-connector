@@ -16,7 +16,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        # Platform Details
+        # Platform and Setup
 
   - type: input
     attributes:
@@ -28,19 +28,19 @@ body:
   - type: input
     attributes:
       label: Spark version
-      description: |
-        What Spark version is the platform running? Run this code:
-        ```
-        %%spark
-        com.microsoft.cdm.BuildInfo.version
-        ```
+      description: "What Spark version is the platform running?"
     validations:
       required: true
       
   - type: input
     attributes:
       label: CDM jar version
-      description: "What jar version are you using?"
+      description: |
+      What jar version are you using? You can also run this code:
+      ```
+      %%spark
+      com.microsoft.cdm.BuildInfo.version
+      ```
     validations:
       required: true
 
@@ -56,7 +56,7 @@ body:
         Describe the issue you faced in this section. 
         Include the code you tried to execute and enclose with ` ``` ` (on its own line) before and after to make it readable.
       placeholder: |
-        I executed this code and it didn't work.
+        These are the repro steps and I executed this code. It didn't work.
         ```
         df.write.format("com.microsoft.cdm")
         .option("storage", "mystorage.dfs.core.windows.net")
@@ -67,8 +67,17 @@ body:
     validations:
       required: true
 
-
-
+  - type: textarea
+    attributes:
+      label: Error stack trace
+      description: >-
+        Add the full stack trace if applicable. The UI should probably show it or you can go into the driver logs.
+      placeholder: |
+        ```
+        Some error stack trace here.
+        ```
+    validations:
+      required: false
 
 
 
