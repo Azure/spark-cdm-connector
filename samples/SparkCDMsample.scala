@@ -1,5 +1,5 @@
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.SaveMode._
+import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.types.{ArrayType, BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
 
 // Databricks notebook source
