@@ -1,7 +1,8 @@
-// Databricks notebook source
 import org.apache.spark.sql.Row
+import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.types.{ArrayType, BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
 
+// Databricks notebook source
 // Specifying appid, appkey and tenanid is optional in spark-cdm-connector-assembly-0.16.jar with Premium Databricks Cluster and Synapse
 val appid = "<appId>"
 val appkey = "<appKey>"
@@ -13,8 +14,6 @@ val storageAccountName = "<storageAccount>.dfs.core.windows.net"
 // COMMAND ----------
 
 // Implicit write case
-import org.apache.spark.sql.types.{ArrayType, BooleanType, DateType, Decimal, DecimalType, DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType, TimestampType}
-
 // Write a CDM entity with Parquet data files, entity definition is derived from the dataframe schema
 val date= java.sql.Date.valueOf("2015-03-31");
 val timestamp = new java.sql.Timestamp(System.currentTimeMillis());
@@ -45,15 +44,14 @@ df.write.format("com.microsoft.cdm")
   .option("entity", "TestEntity")
   .option("format", "parquet")
   .option("compression", "gzip")
-  .mode(SaveMode.Append)
-  .save()
+  .save() // If table already exists, add .mode(SaveMode.Overwrite) or delete the /implicitTest folder
 
 // Append the same dataframe content to the entity in the default CSV format
 df.write.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
   .option("manifestPath", container + "/implicitTest/default.manifest.cdm.json")
   .option("entity", "TestEntity")
-  .option("delimiter", ';')  // Specify what delimiter will be set in the CSV file. Default is comma
+  .option("delimiter", ";")  // Specify what delimiter will be set in the CSV file. Default is comma
   .option("columnHeaders", false)  // Specify a boolean value - where column header will be shown or not
   .option("dataFolderFormat", "'year'yyyy'/month'MM")  // Specify data partitions folder with DateTimeFormatter format
   .option("cdmSource", "builtin") // This fetches the foundation definitions from CDM SDK library
@@ -83,7 +81,6 @@ var schema = new StructType()
   .add(StructField("teamId", StringType, true))
   .add(StructField("versionNumber", LongType, true))
 
-
 var df = spark.createDataFrame(spark.sparkContext.parallelize(data, 1), schema)
 df.write.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
@@ -92,8 +89,7 @@ df.write.format("com.microsoft.cdm")
   .option("entityDefinitionPath", "core/applicationCommon/TeamMembership.cdm.json/TeamMembership")
   .option("useCdmStandardModelRoot", true)  // sets the model root to the CDM CDN schema documents folder
   .option("useSubManifest", true)
-  .mode(SaveMode.Overwrite)
-  .save()
+  .save() // If table already exists, add .mode(SaveMode.Overwrite)
 
 var readDf = spark.read.format("com.microsoft.cdm")
   .option("storage", storageAccountName)
@@ -136,8 +132,7 @@ df2.write.format("com.microsoft.cdm")
   .option("entity", "Person")
   .option("entityDefinitionModelRoot", container + "/Models")
   .option("entityDefinitionPath", "/Contacts/Person.cdm.json/Person")
-  .mode(SaveMode.Overwrite)
-  .save()
+  .save() // If table already exists, add .mode(SaveMode.Overwrite)
 
 val readDf2 = spark.read.format("com.microsoft.cdm")
   .option("storage", storageAccountName)

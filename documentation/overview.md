@@ -7,7 +7,7 @@ The Spark CDM Connector enables a Spark program to read and write CDM entities i
 For information on defining CDM documents, see:
 [https://docs.microsoft.com/en-us/common-data-model/](https://docs.microsoft.com/en-us/common-data-model/).
 
-The connector is currently usign CDM OM version 1.1.0
+The connector is currently usign CDM OM version 1.2.0
 
 ## Using the Spark CDM connector
 
@@ -15,11 +15,12 @@ The Spark CDM Connector is pre-installed on Azure Synapse and requires no additi
 
 Note that there may be a delay before the latest version of the connector is available in Synapse. Use the API below to retrieve the current version of the Spark CDM Connector and compare with the [release notes](https://github.com/Azure/spark-cdm-connector/releases) in GitHub.
 
-```Scala
+```scala
 com.microsoft.cdm.BuildInfo.version
 ```
 
-**Samples:** Sample code and CDM models are available in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
+## Samples
+Checkout the [sample code and CDM files](../samples/) for a quick start.
 
 ## Scenarios
 ### Supported scenarios
@@ -74,11 +75,8 @@ Entity partitions can be in a mix of formats, for example, a mix of CSV and parq
 
 When reading CSV data, the connector uses the Spark FAILFAST option by default [option](https://spark.apache.org/docs/latest/sql-data-sources-csv.html#data-source-option. It will throw an exception if the number of columns != the number of attributes in the entity. Alternativelly, as of 0.19, permissive mode is now supported by the Spark-CDM-Connector. This mode is only supported for CSV files. With the permissive mode, when a CSV row has fewer number of columns than than the entity schema, null values will be assigned for the missing columns. When a CSV row has more columns than the entity schema, the columns greater than the entity schema column count will be truncated to the schema column count. Usage is as follows:
 ```scala
-  .option("entity", "permissive") or .option("mode", "failfast")
-
+  .option("mode", "permissive") or .option("mode", "failfast")
 ```
-
-
 
 ### Writing Data
 
@@ -156,7 +154,7 @@ In Synapse, the Spark CDM Connector supports use of [Managed identities for Azur
 
 You must ensure the identity used is granted access to the appropriate storage accounts.  Grant  **Storage Blob Data Contributor** to allow the library to write to CDM folders, or **Storage Blob Data Reader** to allow only read access. In both cases, no additional connector options are required. 
 
-#### SAS Token access control options ####
+#### SAS Token access control options
 SaS Token Credential authentication to storage accounts is an additional option for authentication to storage. With SAS token authentication, the SaS token can be at the container or folder level. The appropriate permissions (read/write) are required – read manifest/partition only needs read level support, while write requires read and write support.
 
 | **Option**   |**Description**  |**Pattern and example usage**  |
@@ -455,7 +453,3 @@ val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
 The following features are not yet supported:
 - Overriding a timestamp column to be interpreted as a CDM Time rather than a DateTime is initially supported for CSV files only.  Support for writing Time data to Parquet will be added in a later release.
 - Parquet Maptype and arrays of primitive types and arrays of array types are not currently supported by CDM so are not supported by the Spark CDM Connector.
-
-## Samples
-
-See https://github.com/Azure/spark-cdm-connector/tree/master/samples for sample code and CDM files.
