@@ -22,16 +22,13 @@ body:
     attributes:
       label: Summary of issue
       description: >-
-        Describe the issue you faced in this section. 
-        Include the code you tried to execute and enclose with ` ``` ` (on its own line) before and after to make it readable.
+        Describe the issue you faced in this section.
+        Include the code you tried to execute (NOT A PICTURE) and enclose with ` ``` ` before and after to make it readable.
       placeholder: |
-        These are the repro steps and I executed this code. It didn't work.
+        I executed this code and ran into an error. The full error stack trace is included in the next section.
+        
         ```
-        df.write.format("com.microsoft.cdm")
-        .option("storage", "mystorage.dfs.core.windows.net")
-        .option("manifestPath", "container" + "/folder1/default.manifest.cdm.json")
-        .option("entity", "TestEntity")
-        .save()
+        The code you tried to run.
         ```
     validations:
       required: true
@@ -40,7 +37,7 @@ body:
     attributes:
       label: Error stack trace
       description: >-
-        Add the full stack trace if applicable. The UI should probably show it or you can go into the driver logs and get it.
+        Add the **full error stack trace** if applicable. The UI should probably show it or you can go into the driver logs and get it.
       placeholder: |
         ```
         Some error stack trace here.
