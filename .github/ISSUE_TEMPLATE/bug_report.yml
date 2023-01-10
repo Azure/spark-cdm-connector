@@ -40,7 +40,7 @@ body:
     attributes:
       label: Error stack trace
       description: >-
-        Add the full stack trace if applicable. The UI should probably show it or you can go into the driver logs.
+        Add the full stack trace if applicable. The UI should probably show it or you can go into the driver logs and get it.
       placeholder: |
         ```
         Some error stack trace here.
