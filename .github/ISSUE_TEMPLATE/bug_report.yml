@@ -15,7 +15,7 @@ body:
 
   - type: dropdown
     attributes:
-      label: Did read the pinned issues and search error message/issues?
+      label: Did read the pinned issues and search the error message?
       description: >-
         Some users might encounter the same error or the fix is already addressed. You can locate the [pinned issues here](https://github.com/Azure/spark-cdm-connector/issues).
         In addition, you can paste the error message into the search bar and then click on "In this repository" option to search the repo.
