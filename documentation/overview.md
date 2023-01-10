@@ -15,11 +15,12 @@ The Spark CDM Connector is pre-installed on Azure Synapse and requires no additi
 
 Note that there may be a delay before the latest version of the connector is available in Synapse. Use the API below to retrieve the current version of the Spark CDM Connector and compare with the [release notes](https://github.com/Azure/spark-cdm-connector/releases) in GitHub.
 
-```Scala
+```scala
 com.microsoft.cdm.BuildInfo.version
 ```
 
-**Samples:** Sample code and CDM models are available in [GitHub](https://github.com/Azure/spark-cdm-connector/tree/master/samples).
+## Samples
+Checkout the [sample code and CDM files](../samples/) for a quick start.
 
 ## Scenarios
 ### Supported scenarios
@@ -452,7 +453,3 @@ val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
 The following features are not yet supported:
 - Overriding a timestamp column to be interpreted as a CDM Time rather than a DateTime is initially supported for CSV files only.  Support for writing Time data to Parquet will be added in a later release.
 - Parquet Maptype and arrays of primitive types and arrays of array types are not currently supported by CDM so are not supported by the Spark CDM Connector.
-
-## Samples
-
-Check the [examples here](../samples/) for sample code and CDM files.
