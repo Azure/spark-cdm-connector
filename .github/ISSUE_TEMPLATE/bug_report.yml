@@ -13,17 +13,15 @@ body:
         1. Provide a good title starting with [Bug] or [Issue].
         2. Fill out all sections of this bug report form.
 
-  - type: dropdown
+  - type: checkboxes
     attributes:
       label: Did you read the pinned issues and search the error message?
       description: >-
         Some users might encounter the same error or the fix is already addressed. You can locate the [pinned issues here](https://github.com/Azure/spark-cdm-connector/issues).
         Paste some key words in the error message into the search bar and then click on "In this repository" option to search the repo.
       options:
-        - Yes, but I didn't find the answer.
-        - No, but I will read and search it now.
-    validations:
-      required: true
+        - label: Yes. I read and did a search, but I didn't find an answer.
+          required: true
 
   - type: markdown
     attributes:
@@ -81,5 +79,17 @@ body:
       label: CDM jar version
       description: |
         What jar version are you using? If you don't know, you can also run this scala code: `com.microsoft.cdm.BuildInfo.version`
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: What is the format of the data you are trying to read/write?
+      description: >-
+        If writing, the default is "csv", unless you specify "parquet" in the write options.
+        If reading, you can look into the storage account folder and it may likely be "csv" as well.
+      options:
+        - .csv
+        - .parquet
     validations:
       required: true
