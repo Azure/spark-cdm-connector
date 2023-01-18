@@ -20,7 +20,7 @@ body:
         Some users might encounter the same error or the fix is already addressed. You can locate the [pinned issues here](https://github.com/Azure/spark-cdm-connector/issues).
         Paste some key words in the error message into the search bar and then click on "In this repository" option to search the repo.
       options:
-        - label: Yes I read and serached, but I didn't find the answer.
+        - label: Yes I read and did a search, but I didn't find an answer.
           required: true
 
   - type: markdown
