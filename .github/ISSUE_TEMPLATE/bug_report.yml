@@ -55,15 +55,6 @@ body:
     validations:
       required: false
 
-  - type: dropdown
-    attributes:
-      label: What format is your data in?
-      options:
-        - .csv
-        - .parquet
-    validations:
-      required: true
-
   - type: markdown
     attributes:
       value: |
@@ -88,5 +79,17 @@ body:
       label: CDM jar version
       description: |
         What jar version are you using? If you don't know, you can also run this scala code: `com.microsoft.cdm.BuildInfo.version`
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: What is the format of the data you are trying to read/write?
+      description: >-
+        If writing, the default is "csv", unless you specify "parquet" in the write options.
+        If reading, you can look into the storage account folder and it may likely be "csv" as well.
+      options:
+        - .csv
+        - .parquet
     validations:
       required: true
