@@ -7,7 +7,7 @@ The Spark CDM Connector enables a Spark program to read and write CDM entities i
 For information on defining CDM documents, see:
 [https://docs.microsoft.com/en-us/common-data-model/](https://docs.microsoft.com/en-us/common-data-model/).
 
-The connector is currently usign CDM OM version 1.2.0
+The connector is currently using CDM OM version 1.2.0
 
 ## Using the Spark CDM connector
 
