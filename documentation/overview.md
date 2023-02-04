@@ -1,3 +1,4 @@
+
 # Using the Spark CDM Connector
 
 ## Overview
@@ -7,7 +8,7 @@ The Spark CDM Connector enables a Spark program to read and write CDM entities i
 For information on defining CDM documents, see:
 [https://docs.microsoft.com/en-us/common-data-model/](https://docs.microsoft.com/en-us/common-data-model/).
 
-The connector is currently usign CDM OM version 1.2.0
+The connector is currently using CDM OM version 1.2.0
 
 ## Using the Spark CDM connector
 
@@ -198,7 +199,7 @@ The following options identify the logical entity definition that defines the en
 |entityDefinitionStorage |The ADLS gen2 storage account containing the entity definition. Required if different to the storage account hosting the CDM folder.|\<accountName\>.dfs.core.windows.net<br/>"myAccount.dfs.core.windows.net"|
 |entityDefinitionModelRoot|The location of the model root or corpus within the account. |\<container\>/\<folderPath\> <br/> "crm/core"<br/>|
 |entityDefinitionPath|Location of the entity. File path to the CDM definition file relative to the model root, including the name of the entity in that file.|\<folderPath\>/\<entityName\>.cdm.json/\<entityName\><br/>"sales/customer.cdm.json/customer"|
-configPath| The container and folder path to a config.json file that contains the adapter configurations for all aliases included in the entity definition file and any directly or indirectly referenced CDM files. **Not required if the config.json is in the model root folder.**| \<container\>\<folderPath\>|
+configPath| The container and folder path to a config.json file that contains the adapter configurations for all aliases included in the entity definition file and any directly or indirectly referenced CDM files. **Not required if the config.json is in the model root folder.**| "\<container\>\\<folderPath\>"|
 |useCdmStandardModelRoot | Indicates the model root is located at [https://cdm-schema.microsoft.com/CDM/logical/](https://github.com/microsoft/CDM/tree/master/schemaDocuments) <br/>Used to reference entity types defined in the CDM Content Delivery Network (CDN).<br/>***Overrides:*** entityDefinitionStorage, entityDefinitionModelRoot if specified.<br/>| "useCdmStandardModelRoot" |
 |cdmSource|Defines how the 'cdm' alias if present in CDM definition files is resolved. If this option is used, it overrides any _cdm_ adapter specified in the config.json file.  Values are "builtin" or "referenced".  Default value is "referenced"  <br/> If set to _referenced_, then the latest published standard CDM definitions at https://cdm-schema.microsoft.com/logical/ are used.  If set to _builtin_ then the CDM base definitions built-in to the CDM object model used by the Spark CDM Connector will be used. <br/> Note: <br/> 1). The Spark CDM Connector may not be using the latest CDM SDK so may not contain the latest published standard definitions. <br/> 2). The built-in definitions only include the top-level CDM content such as foundations.cdm.json, primitives.cdm.json, etc.  If you wish to use lower-level standard CDM definitions, either use _referenced_ or include a cdm adapter in the config.json.<br/>| "builtin"\|"referenced". |     
 
@@ -219,11 +220,11 @@ Folder organization and file format can be changed with the following options.
 
 |**Option**  |**Description**  |**Pattern / example usage**  |
 |---------|---------|:---------:|
-|useSubManifest|If true, causes the target entity to be included in the root manifest via a sub-manifest. The sub-manifest and the entity definition are written into an entity folder beneath the root. Default is false.|"true"\|"false" |
-|format|Defines the file format. Current supported file formats are CSV and parquet. Default is "csv"|"csv"\|"parquet" <br/> |
-|delimiter|CSV only.  Defines the delimiter used.  Default is comma.   | "\|") |
-|columnHeaders| CSV only.  If true, will add a first row to data files with column headers. Default is "true"|"true"\|"false""| 
-|compression|Write only. Parquet only. Defines the compression format used. Default is "snappy" \|"uncompressed" \| "snappy" \| "gzip" \| "lzo". 
+|useSubManifest|If true, causes the target entity to be included in the root manifest via a sub-manifest. The sub-manifest and the entity definition are written into an entity folder beneath the root. Default is false.|"true" \| "false" |
+|format|Defines the file format. Current supported file formats are CSV and parquet. Default is "csv"|"csv" \| "parquet" <br/> |
+|delimiter|CSV only.  Defines the delimiter used.  Default is comma.   | "\|" |
+|columnHeaders| CSV only.  If true, will add a first row to data files with column headers. Default is "true"|"true" \| "false"| 
+|compression|Write only. Parquet only. Defines the compression format used. Default is "snappy"  | "uncompressed" \| "snappy" \| "gzip" \| "lzo" | 
 |dataFolderFormat|Allows user-definable data folder structure within an entity folder.  Allows the use of date and time values to be substituted into folder names using DateTimeFormatter formatting. Non-formatter content must be enclosed in single quotes. Default format is ```"yyyy'-'MM'-'dd" ``` producing folder names like 2020-07-30| ```"'year'yyyy'/month'MM"``` <br/> ```"'Data'"```|
 
 #### Save Mode
