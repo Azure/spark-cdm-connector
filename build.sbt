@@ -17,33 +17,29 @@ pomPostProcess := { (node: XmlNode) =>
   }).transform(node).head
 }
 
-version := "spark3.2-1.19.4"
+version := "spark3.3-1.19.5"
 
 crossPaths := false
 ThisBuild / scalaVersion := "2.12.15"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 
-libraryDependencies += "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.13.3"
-libraryDependencies += "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.13.3"
+libraryDependencies += "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.13.4"
+libraryDependencies += "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.13.4"
 
 //these libraries already exist in spark HDI 2.4.0 - don't include them building the uber jar
-dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.3"
-libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.3"
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.13.3"
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-annotations" % "2.13.3"
-libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.5"  % "provided"
-libraryDependencies += "log4j" % "log4j" % "1.2.17" % "provided"
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.1" % "provided"
-libraryDependencies += "org.apache.spark" %% "spark-core" % "3.2.1" % "provided"
-libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.6" % "provided"
+dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.4.1"
+libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.4"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.13.4"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-annotations" % "2.13.4"
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.12.0"  % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.3.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-core" % "3.3.0" % "provided"
+libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.13" % "provided"
 libraryDependencies += "com.google.guava" % "guava" % "14.0.1" % "provided"
-libraryDependencies += "commons-io" % "commons-io" % "2.4" % "provided"
-libraryDependencies += "com.microsoft.azure" % "adal4j" % "1.6.3"
+libraryDependencies += "commons-io" % "commons-io" % "2.11.0" % "provided"
 libraryDependencies += "com.microsoft.azure" % "msal4j" % "1.10.1"
 libraryDependencies += "org.apache.hadoop" % "hadoop-azure" % "3.3.1" % "provided"
 libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "3.3.1" % "provided"
-
-libraryDependencies += "org.wildfly.openssl" % "wildfly-openssl" % "1.0.7.Final" % "provided"
 
 resolvers += "Maven Twitter Releases" at "https://maven.twttr.com/"
 libraryDependencies += "com.hadoop.gplcompression" % "hadoop-lzo" % "0.4.20"
@@ -67,10 +63,10 @@ lazy val grandchild = Project("DatabricksADTokenMock", file("DatabricksTokenProv
 
 //assembly
 assemblyShadeRules in assembly := Seq(
+  ShadeRule.rename("com.microsoft.aad.msal4j.**" -> "shadeiomsal4j.@1").inAll,
   ShadeRule.rename("com.fasterxml.jackson.**" -> "shadeio.@1").inAll,
   ShadeRule.rename("com.nimbusds.**" -> "shadeionimbusds.@1").inAll,
-  ShadeRule.rename("com.microsoft.aad.adal4j.**" -> "shadeioadal4j.@1").inAll,
-  ShadeRule.rename("com.microsoft.aad.msal4j.**" -> "shadeiomsal4j.@1").inAll
+  ShadeRule.rename("net.minidev.**" -> "shadeiominidev.@1").inAll
 )
 
 

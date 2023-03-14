@@ -34,25 +34,15 @@ class DefaultSource extends SupportsCatalogOptions{
 
     override def supportsExternalMetadata(): Boolean = true
 
-    def setupDefaultSparkCatalog(spark: SparkSession, options: CaseInsensitiveStringMap) = {
-        spark.conf.set("spark.sql.catalog.cdm", "com.microsoft.cdm.CDMCatalog")
-//        spark.conf.set("spark.sql.catalog.cdm.appId", options.get("appId"))
-//        spark.conf.set("spark.sql.catalog.cdm.appKey", options.get("appKey"))
-//        spark.conf.set("spark.sql.catalog.cdm.tenantId", options.get("tenantId"))
-//        spark.conf.set("spark.sql.catalog.cdm.storage", options.get("storage"))
-//        spark.conf.set("spark.sql.catalog.cdm.container", options.get("container"))
-        spark.sessionState.catalogManager.catalog("cdm")
-    }
-
     override def extractIdentifier(options: CaseInsensitiveStringMap): Identifier = {
-
         val spark = SparkSession.active;
-        setupDefaultSparkCatalog(spark, options);
+        spark.conf.set("spark.sql.catalog.cdm", "com.microsoft.cdm.CDMCatalog")
+        val cdmcatalog = spark.sessionState.catalogManager.catalog("cdm")
+        cdmcatalog.asInstanceOf[CDMCatalog].setupOptions(options)
         new CDMIdentifier(options)
     }
 
     override def extractCatalog(options: CaseInsensitiveStringMap): String = {
         "cdm"
     }
-
 }

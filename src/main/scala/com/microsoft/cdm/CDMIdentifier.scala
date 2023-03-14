@@ -6,12 +6,9 @@ import org.apache.spark.sql.connector.catalog.Identifier
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 class CDMIdentifier(options: CaseInsensitiveStringMap) extends Identifier{
-
-  val cdmOptions = new CDMOptions(options)
+  private val cdmOptions = new CDMOptions(options) // used to do option validation
 
   override def namespace(): Array[String] = Array(cdmOptions.storage, cdmOptions.container, cdmOptions.manifestFileName)
 
   override def name(): String = cdmOptions.entity
-
-  val optionsAsHashMap = options
 }

@@ -13,22 +13,25 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 
 class CDMCatalog extends CatalogPlugin with TableCatalog with SupportsNamespaces {
-
   val logger  = LoggerFactory.getLogger(classOf[CDMCatalog])
-  var cdmOptions: CDMOptions = null;
-  var tables: HadoopTables = null;
+  var cdmOptions: CDMOptions = _
+  var tables: HadoopTables = _
+  private var options: CaseInsensitiveStringMap = _
 
   override def initialize(name: String, options: CaseInsensitiveStringMap): Unit = {
     logger.info("Initializing CDM Catalog...")
     this.tables = new HadoopTables()
   }
 
+  def setupOptions(options: CaseInsensitiveStringMap): Unit = {
+    this.options = options
+  }
+
   @throws(classOf[NoSuchTableException])
   override def loadTable(ident: Identifier): SparkTable  = {
     try {
-      cdmOptions = ident.asInstanceOf[CDMIdentifier].cdmOptions
-      val cdmEntity = tables.load(cdmOptions)
-      new SparkTable(cdmEntity.schema, ident.asInstanceOf[CDMIdentifier].optionsAsHashMap)
+      val cdmEntity = tables.load(new CDMOptions(options))
+      new SparkTable(cdmEntity.schema, options)
     } catch {
       case e: EntityNotFoundException =>  throw new NoSuchTableException(e.getMessage)
       case e: ManifestNotFoundException => throw new NoSuchTableException(e.getMessage)
@@ -37,7 +40,7 @@ class CDMCatalog extends CatalogPlugin with TableCatalog with SupportsNamespaces
 
   @throws(classOf[TableAlreadyExistsException])
   override def createTable(ident: Identifier, schema: StructType, partitions: Array[Transform], properties: util.Map[String, String]): Table = {
-     new SparkTable(schema, ident.asInstanceOf[CDMIdentifier].optionsAsHashMap) //make it write options
+     new SparkTable(schema, options) //make it write options
   }
 
   override def alterTable(ident: Identifier, changes: TableChange*): Table = {
@@ -58,14 +61,13 @@ class CDMCatalog extends CatalogPlugin with TableCatalog with SupportsNamespaces
 
   override def alterNamespace(namespace: Array[String], changes: NamespaceChange*): Unit = throw new UnsupportedOperationException("Not supported")
 
-  override def dropNamespace(namespace: Array[String]): Boolean = throw new UnsupportedOperationException("Not supported")
+  override def dropNamespace(namespace: Array[String], cascade: Boolean): Boolean = throw new UnsupportedOperationException("Not supported")
 
   override def listTables(namespace: Array[String]): Array[Identifier] = throw new UnsupportedOperationException("Not supported")
 
   override def toString = s"${this.getClass.getCanonicalName}($name)"
 
-  override def name(): String = "CDM"
-
+  override def name(): String = "cdm"
 
   private def getRequiredArgument(options: CaseInsensitiveStringMap, arg: String): String = {
     val result = if (options.containsKey(arg)) options.get(arg) else  {
