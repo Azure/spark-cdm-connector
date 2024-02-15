@@ -20,6 +20,19 @@ Note that there may be a delay before the latest version of the connector is ava
 com.microsoft.cdm.BuildInfo.version
 ```
 
+### Manual Installation
+
+The Spark CDM Connector may manually installed for use outside of Synapse.
+
+#### Databricks
+
+1. Download the `.jar` from the [releases](https://github.com/Azure/spark-cdm-connector/releases) in GitHub that's compatible with the version of Spark you're using.
+2. In the `Compute` menu, select your cluster and open the "Libraries" tab
+3. Select "DBFS" and upload the `.jar` downloaded in step 1.
+
+![image](https://github.com/carlo-quinonez/spark-cdm-connector/assets/53790047/42866ccf-eabd-441c-8b83-f9ff60ce2722)
+
+
 ## Samples
 Checkout the [sample code and CDM files](../samples/) for a quick start.
 
@@ -448,6 +461,9 @@ val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
 
 - Ensure the decimal precision and scale of decimal data type fields used in the dataframe match the data type used in the CDM entity definition - requires precision and scale traits are defined on the data type.  If the precision and scale are not defined explicitly in CDM, the default used is Decimal(18,4).  For model.json files, Decimal is assumed to be Decimal(18,4).
 - Folder and file names in the options below should not include spaces or special characters, such as "=": manifestPath, entityDefinitionModelRoot, entityDefinitionPath, dataFolderFormat.
+- The connnector is not compatible with the Databricks Unity Catalog [(#149)](https://github.com/Azure/spark-cdm-connector/issues/149). Unity Catalog can be disabled on a cluster if it's run in "No Isolation, Shared" mode. 
+![image](https://github.com/carlo-quinonez/spark-cdm-connector/assets/53790047/5fc3c749-0551-4034-91a8-51381730bfd6)
+![image](https://github.com/carlo-quinonez/spark-cdm-connector/assets/53790047/0a95beb6-bf2e-4fd9-a789-37293491412a)
 
 ## Not yet supported
 
