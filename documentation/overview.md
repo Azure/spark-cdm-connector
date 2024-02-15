@@ -30,7 +30,7 @@ The Spark CDM Connector may manually installed for use outside of Synapse.
 2. In the `Compute` menu, select your cluster and open the "Libraries" tab
 3. Select "DBFS" and upload the `.jar` downloaded in step 1.
 
-![image](https://github.com/carlo-quinonez/spark-cdm-connector/assets/53790047/42866ccf-eabd-441c-8b83-f9ff60ce2722)
+![Install Library dialog with DBFS selected as the source](./databricksInstallation.png)
 
 
 ## Samples
@@ -87,7 +87,7 @@ The connector looks in the specified manifest and any first-level sub-manifests 
 
 Entity partitions can be in a mix of formats, for example, a mix of CSV and parquet files. All the entity data files identified in the manifest are combined into one dataset regardless of format and loaded to the dataframe.
 
-When reading CSV data, the connector uses the Spark FAILFAST option by default [option](https://spark.apache.org/docs/latest/sql-data-sources-csv.html#data-source-option. It will throw an exception if the number of columns != the number of attributes in the entity. Alternativelly, as of 0.19, permissive mode is now supported by the Spark-CDM-Connector. This mode is only supported for CSV files. With the permissive mode, when a CSV row has fewer number of columns than than the entity schema, null values will be assigned for the missing columns. When a CSV row has more columns than the entity schema, the columns greater than the entity schema column count will be truncated to the schema column count. Usage is as follows:
+When reading CSV data, the connector uses the Spark FAILFAST option by default [option](https://spark.apache.org/docs/latest/sql-data-sources-csv.html#data-source-option). It will throw an exception if the number of columns != the number of attributes in the entity. Alternativelly, as of 0.19, permissive mode is now supported by the Spark-CDM-Connector. This mode is only supported for CSV files. With the permissive mode, when a CSV row has fewer number of columns than than the entity schema, null values will be assigned for the missing columns. When a CSV row has more columns than the entity schema, the columns greater than the entity schema column count will be truncated to the schema column count. Usage is as follows:
 ```scala
   .option("mode", "permissive") or .option("mode", "failfast")
 ```
@@ -461,9 +461,10 @@ val df= spark.createDataFrame(spark.sparkContext.parallelize(data, 2), schema)
 
 - Ensure the decimal precision and scale of decimal data type fields used in the dataframe match the data type used in the CDM entity definition - requires precision and scale traits are defined on the data type.  If the precision and scale are not defined explicitly in CDM, the default used is Decimal(18,4).  For model.json files, Decimal is assumed to be Decimal(18,4).
 - Folder and file names in the options below should not include spaces or special characters, such as "=": manifestPath, entityDefinitionModelRoot, entityDefinitionPath, dataFolderFormat.
-- The connnector is not compatible with the Databricks Unity Catalog [(#149)](https://github.com/Azure/spark-cdm-connector/issues/149). Unity Catalog can be disabled on a cluster if it's run in "No Isolation, Shared" mode. 
-![image](https://github.com/carlo-quinonez/spark-cdm-connector/assets/53790047/5fc3c749-0551-4034-91a8-51381730bfd6)
-![image](https://github.com/carlo-quinonez/spark-cdm-connector/assets/53790047/0a95beb6-bf2e-4fd9-a789-37293491412a)
+- The connnector is not compatible with the Databricks Unity Catalog [(#149)](https://github.com/Azure/spark-cdm-connector/issues/149). Unity Catalog can be disabled on a cluster if it's run in "No Isolation, Shared" mode.
+
+![cluster configuration in "No isolation" mode and compatible with Spark CDM Connector](./compatibleCluster.png)
+![cluster configuration in a shared mode and incompatible with Spark CDM Connector](./incompatibleCluster.png)
 
 ## Not yet supported
 
